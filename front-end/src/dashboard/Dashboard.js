@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useLocation } from "react-router-dom";
-import { listReservations } from "../utils/api";
+import { listReservations, listTables } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
 /**
@@ -12,6 +12,8 @@ import ErrorAlert from "../layout/ErrorAlert";
 function Dashboard({ date }) {
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
+  const [tables, setTables] = useState([]);
+  const [tablesError, setTablesError] = useState(null);
 
   //Setting the date variable to the query string, should it exist, here to preserve given code
   const search = useLocation().search;
@@ -28,10 +30,11 @@ function Dashboard({ date }) {
     listReservations({ date }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError);
+    listTables(abortController.signal).then(setTables).catch(setTablesError);
     return () => abortController.abort();
   }
 
-  const tableRows = reservations.map((reservation) => (
+  const reservationRows = reservations.map((reservation) => (
     <tr key={reservation.reservation_id}>
       <th scope="row">{reservation.reservation_id}</th>
       <td>{reservation.first_name}</td>
@@ -42,6 +45,14 @@ function Dashboard({ date }) {
       <td>{reservation.people}</td>
     </tr>
   ));
+  const tableRows = tables.map((table) => (
+    <tr key={table.table_id}>
+      <th scope="row">{table.table_id}</th>
+      <td>{table.table_name}</td>
+      <td>{table.capacity}</td>
+      <td>{table.available}</td>
+    </tr>
+  ));
 
   return (
     <main>
@@ -50,6 +61,7 @@ function Dashboard({ date }) {
         <h4 className="mb-0">{`Reservations for date: ${date}`}</h4>
       </div>
       <ErrorAlert error={reservationsError} />
+      <ErrorAlert error={tablesError} />
       <table className="table">
         <thead>
           <tr>
@@ -60,6 +72,17 @@ function Dashboard({ date }) {
             <th scope="col">Reservation Date</th>
             <th scope="col">Reservation Time</th>
             <th scope="col">People</th>
+          </tr>
+        </thead>
+        <tbody>{reservationRows}</tbody>
+      </table>
+      <table className="table">
+        <thead>
+          <tr>
+            <th scope="col">Table ID</th>
+            <th scope="col">Table Name</th>
+            <th scope="col">Capacity</th>
+            <th scope="col">Availability</th>
           </tr>
         </thead>
         <tbody>{tableRows}</tbody>
