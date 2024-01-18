@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import {useLocation} from "react-router-dom";
+import { useLocation } from "react-router-dom";
 import { listReservations } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
@@ -15,8 +15,8 @@ function Dashboard({ date }) {
 
   //Setting the date variable to the query string, should it exist, here to preserve given code
   const search = useLocation().search;
-  const qDate = new URLSearchParams(search).get('date');
-  if(qDate){
+  const qDate = new URLSearchParams(search).get("date");
+  if (qDate) {
     date = qDate;
   }
 
@@ -51,21 +51,19 @@ function Dashboard({ date }) {
       </div>
       <ErrorAlert error={reservationsError} />
       <table className="table">
-      <thead>
-      <tr>
-        <th scope="col">Reservation ID</th>
-        <th scope="col">First Name</th>
-        <th scope="col">Last Name</th>
-        <th scope="col">Mobile Number</th>
-        <th scope="col">Reservation Date</th>
-        <th scope="col">Reservation Time</th>
-        <th scope="col">People</th>
-      </tr>
-      </thead>
-      <tbody>
-      {tableRows}
-      </tbody>
-    </table>
+        <thead>
+          <tr>
+            <th scope="col">Reservation ID</th>
+            <th scope="col">First Name</th>
+            <th scope="col">Last Name</th>
+            <th scope="col">Mobile Number</th>
+            <th scope="col">Reservation Date</th>
+            <th scope="col">Reservation Time</th>
+            <th scope="col">People</th>
+          </tr>
+        </thead>
+        <tbody>{tableRows}</tbody>
+      </table>
     </main>
   );
 }
