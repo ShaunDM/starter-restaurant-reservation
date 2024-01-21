@@ -16,8 +16,11 @@ router
   .post(corsPost, controller.create)
   .options(corsPost)
   .all(methodNotAllowed);
+
 router
   .route("/")
+  .post(corsPost, controller.create)
+  .options(corsPost)
   .get(corsGet, controller.list)
   .options(corsGet)
   .all(methodNotAllowed);

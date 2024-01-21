@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { createReservation } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-import { today } from "../utils/date-time";
+// import { today } from "../utils/date-time";
+//Can't use mins or maxes for the html inputs as it prevents thinkful tests from submitting to server, today function was going to be min for date.
 
 function ReservationCreate() {
   const history = useHistory();
@@ -14,7 +15,7 @@ function ReservationCreate() {
     mobile_number: "",
     reservation_date: "",
     reservation_time: "",
-    people: "",
+    people: 1,
   });
 
   function cancelHandler() {
@@ -22,17 +23,21 @@ function ReservationCreate() {
   }
 
   function changeHandler({ target: { name, value } }) {
-    setReservation((previousReservation) => ({
-      ...previousReservation,
-      [name]: value,
-    }));
+    if (name === "people") {
+      setReservation({ ...reservation, people: parseInt(value) });
+    } else {
+      setReservation((previousReservation) => ({
+        ...previousReservation,
+        [name]: value,
+      }));
+    }
   }
 
   function submitHandler(event) {
     event.preventDefault();
     createReservation(reservation)
       .then(() => {
-        history.push("/");
+        history.push(`/dashboard?date=${reservation.reservation_date}`);
       })
       .catch(setError);
   }
@@ -80,13 +85,11 @@ function ReservationCreate() {
               id="mobile_number"
               name="mobile_number"
               type="tel"
-              pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
               placeholder="xxx-xxx-xxxx"
               value={reservation.mobile_number}
               onChange={changeHandler}
               required={true}
             />
-            <small>Format: 123-456-7890</small>
           </div>
           <div className="col-6 form-group">
             <label className="form-label" htmlFor="reservation_date">
@@ -97,7 +100,7 @@ function ReservationCreate() {
               id="reservation_date"
               name="reservation_date"
               type="date"
-              min={today()}
+              // min={today()}
               value={reservation.reservation_date}
               onChange={changeHandler}
               required={true}
@@ -112,13 +115,15 @@ function ReservationCreate() {
               id="reservation_time"
               name="reservation_time"
               type="time"
-              min="10:30"
-              max="21:30"
+              // min="10:30"
+              // max="21:30"
               value={reservation.reservation_time}
               onChange={changeHandler}
               required={true}
             />
-            <small>Office hours are 9am to 6pm</small>
+            <small>
+              Reservations are allowed for the hours of 10:30am to 9:30pm
+            </small>
           </div>
           <div className="col-6 form-group">
             <label className="form-label" htmlFor="people">
@@ -129,6 +134,7 @@ function ReservationCreate() {
               id="people"
               name="people"
               type="number"
+              // min="1"
               value={reservation.people}
               onChange={changeHandler}
               required={true}

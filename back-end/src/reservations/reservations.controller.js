@@ -26,26 +26,46 @@ async function list(req, res) {
 function hasValidDate(req, res, next) {
   const { reservation_date, reservation_time } = req.body.data;
   const date = new Date(reservation_date.concat(", ", reservation_time));
+  console.log(date);
+  if (Number.isNaN(Date.parse(date))) {
+    next({ status: 400, message: "reservation_date is not a date." });
+  }
   if (date.getDay() == 2) {
     next({
       status: 400,
-      message: `The restaurant is closed on Tuesdays, invalid reservation day.`,
+      message: "The restaurant is closed on Tuesdays, invalid reservation day.",
     });
   }
   if (Date.now() > Date.parse(date)) {
-    next({ status: 400, message: `Reservation can't be made in the past.` });
+    next({ status: 400, message: "Reservation must be made in the future." });
   }
   next();
 }
 
 function hasValidTime(req, res, next) {
   const { reservation_time } = req.body.data;
+  const getHrsMin = reservation_time.split(":");
+  const isNumber = getHrsMin.every((number) =>
+    Number.isInteger(parseInt(number))
+  );
+  if (!isNumber) {
+    next({ status: 400, message: "reservation_time is not a time." });
+  }
   if (reservation_time > "21:30" || reservation_time < "10:30") {
     next({
       status: 400,
       message:
         "Invalid time, restaurant opens at 10:30AM and allows for the last reservation at 9:30PM.",
     });
+  }
+  next();
+}
+
+function hasValidPeople(req, res, next) {
+  const { people } = req.body.data;
+  console.log(people, Number.isInteger(people));
+  if (!Number.isInteger(people)) {
+    next({ status: 400, message: "Property people is not a number." });
   }
   next();
 }
@@ -64,7 +84,7 @@ function hasProperty(property, req, res, next) {
 
 function hasValidProperties(req, res, next) {
   if (!req.body.data) {
-    next({ status: 400, message: "body must have data property" });
+    next({ status: 400, message: "body must have[] data property" });
   }
   const needsProperties = [
     "first_name",
@@ -82,7 +102,7 @@ function hasValidProperties(req, res, next) {
 
 async function create(req, res) {
   const newReservation = await service.create(req.body.data);
-  res.status(201).json({ data: newReservation });
+  res.status(201).json({ data: newReservation[0] });
 }
 
 module.exports = {
@@ -91,6 +111,7 @@ module.exports = {
     hasValidProperties,
     hasValidTime,
     hasValidDate,
+    hasValidPeople,
     asyncErrorBoundary(create),
   ],
 };
