@@ -135,4 +135,5 @@ module.exports = {
     hasValidPeople,
     asyncErrorBoundary(create),
   ],
+  reservationExists,
 };

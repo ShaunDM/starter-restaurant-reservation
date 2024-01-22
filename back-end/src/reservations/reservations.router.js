@@ -7,9 +7,16 @@ const cors = require("cors");
 const router = require("express").Router();
 const methodNotAllowed = require("../errors/methodNotAllowed");
 const controller = require("./reservations.controller");
+const tablesRouter = require("../tables/tables.router");
 
 const corsGet = cors({ method: "GET" });
 const corsPost = cors({ method: "POST" });
+
+router.use(
+  "/:reservation_Id/tables",
+  controller.reservationExists,
+  tablesRouter
+);
 
 router
   .route("/:reservation_Id")

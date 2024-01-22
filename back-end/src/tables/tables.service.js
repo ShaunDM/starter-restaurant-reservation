@@ -35,8 +35,8 @@ async function readReservation(id) {
 
 async function update(table) {
   const table_id = table.table_id;
-  console.log(table_id);
   return knex("tables_reservations")
+    .returning("*")
     .where({ table_id: table_id })
     .first()
     .update(table);

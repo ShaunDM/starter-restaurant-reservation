@@ -101,7 +101,7 @@ export async function readReservation(reservation_id, signal) {
 }
 
 export async function seatTable(seat, signal) {
-  const url = `${API_BASE_URL}/tables/${seat.table_id}/seat`;
+  const url = `${API_BASE_URL}/reservations/${seat.reservation_id}/tables/${seat.table_id}/seat`;
   const options = {
     method: "PUT",
     headers,
