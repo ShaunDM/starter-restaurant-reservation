@@ -123,6 +123,7 @@ async function tableHasCapacity(req, res, next) {
 async function update(req, res) {
   const resUpdate = {
     ...res.locals.table_reservation,
+    reservation_id: res.locals.reservation.reservation_id,
     available: "Occupied",
   };
   console.log("update", resUpdate);
