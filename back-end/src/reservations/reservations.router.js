@@ -12,6 +12,12 @@ const corsGet = cors({ method: "GET" });
 const corsPost = cors({ method: "POST" });
 
 router
+  .route("/:reservation_Id")
+  .get(corsGet, controller.read)
+  .options(corsGet)
+  .all(methodNotAllowed);
+
+router
   .route("/new")
   .post(corsPost, controller.create)
   .options(corsPost)

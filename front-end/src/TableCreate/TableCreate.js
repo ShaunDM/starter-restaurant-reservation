@@ -13,14 +13,21 @@ function TableCreate() {
   });
 
   function cancelHandler() {
-    history.push("/");
+    history.goBack();
   }
 
   function changeHandler({ target: { name, value } }) {
-    setTable((previousTable) => ({
-      ...previousTable,
-      [name]: value,
-    }));
+    if (name === "capacity") {
+      setTable((previousTable) => ({
+        ...previousTable,
+        capacity: parseInt(value),
+      }));
+    } else {
+      setTable((previousTable) => ({
+        ...previousTable,
+        [name]: value,
+      }));
+    }
   }
 
   function submitHandler(event) {
@@ -47,7 +54,7 @@ function TableCreate() {
               id="table_name"
               name="table_name"
               type="text"
-              minlength="2"
+              // minlength="2"
               value={table.table_name}
               onChange={changeHandler}
               required={true}
@@ -62,7 +69,7 @@ function TableCreate() {
               id="capacity"
               name="capacity"
               type="number"
-              min="1"
+              // min="1"
               value={table.capacity}
               onChange={changeHandler}
               required={true}

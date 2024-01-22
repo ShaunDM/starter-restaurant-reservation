@@ -94,3 +94,19 @@ export async function createTable(table, signal) {
   };
   return await fetchJson(url, options);
 }
+
+export async function readReservation(reservation_id, signal) {
+  const url = `${API_BASE_URL}/reservations/${reservation_id}`;
+  return await fetchJson(url, { headers, signal }, []);
+}
+
+export async function seatTable(seat, signal) {
+  const url = `${API_BASE_URL}/tables/${seat.table_id}/seat`;
+  const options = {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({ data: { reservation_id: seat.reservation_id } }),
+    signal,
+  };
+  return await fetchJson(url, options);
+}

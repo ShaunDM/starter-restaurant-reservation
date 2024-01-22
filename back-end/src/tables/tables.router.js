@@ -10,6 +10,13 @@ const controller = require("./tables.controller");
 
 const corsGet = cors({ method: "GET" });
 const corsPost = cors({ method: "POST" });
+const corsPut = cors({ method: "PUT" });
+
+router
+  .route("/:table_id/seat")
+  .put(corsPut, controller.update)
+  .options(corsPut)
+  .all(methodNotAllowed);
 
 router
   .route("/new")
@@ -21,6 +28,8 @@ router
   .route("/")
   .get(corsGet, controller.list)
   .options(corsGet)
+  .post(corsPost, controller.create)
+  .options(corsPost)
   .all(methodNotAllowed);
 
 module.exports = router;

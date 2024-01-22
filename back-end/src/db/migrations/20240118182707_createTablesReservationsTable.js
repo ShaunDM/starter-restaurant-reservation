@@ -11,7 +11,7 @@ exports.up = function (knex) {
       .inTable("tables")
       .onDelete("CASCADE");
     table.string("available").notNullable().defaultTo("Free");
-    table.integer("reservation_id").unsigned();
+    table.integer("reservation_id").unsigned().defaultTo(null);
     table
       .foreign("reservation_id")
       .references("reservation_id")

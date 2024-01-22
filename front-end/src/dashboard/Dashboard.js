@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useLocation } from "react-router-dom";
+import { useLocation, Link } from "react-router-dom";
 import { listReservations, listTables } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 
@@ -30,6 +30,7 @@ function Dashboard({ date }) {
     listReservations({ date }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError);
+    setTablesError(null);
     listTables(abortController.signal).then(setTables).catch(setTablesError);
     return () => abortController.abort();
   }
@@ -43,6 +44,14 @@ function Dashboard({ date }) {
       <td>{reservation.reservation_date}</td>
       <td>{reservation.reservation_time}</td>
       <td>{reservation.people}</td>
+      <td>
+        <Link
+          to={`/reservations/${reservation.reservation_id}/seat`}
+          className="btn btn-primary"
+        >
+          Seat
+        </Link>
+      </td>
     </tr>
   ));
   const tableRows = tables.map((table) => (
@@ -50,7 +59,7 @@ function Dashboard({ date }) {
       <th scope="row">{table.table_id}</th>
       <td>{table.table_name}</td>
       <td>{table.capacity}</td>
-      <td>{table.available}</td>
+      <td data-table-id-status={table.table_id}>{table.available}</td>
     </tr>
   ));
 

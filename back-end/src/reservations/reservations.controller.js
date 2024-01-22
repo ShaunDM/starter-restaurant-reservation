@@ -21,6 +21,26 @@ async function list(req, res) {
   });
 }
 
+async function reservationExists(req, res, next) {
+  const { reservation_Id } = req.params;
+  const foundReservation = await service.read(reservation_Id);
+  if (foundReservation) {
+    res.locals.reservation = foundReservation;
+    return next();
+  }
+  next({ status: 404, message: `reservation_id: ${reservation_Id} not found` });
+}
+
+function read(req, res) {
+  const { reservation } = res.locals;
+  res.status(200).json({
+    data: {
+      reservation_id: reservation.reservation_id,
+      reservation: reservation,
+    },
+  });
+}
+
 //checks the day of the week to ensure valid, concat adds time element so that it's not checking against an inappropriate time zone upon date creation.
 
 function hasValidDate(req, res, next) {
@@ -84,7 +104,7 @@ function hasProperty(property, req, res, next) {
 
 function hasValidProperties(req, res, next) {
   if (!req.body.data) {
-    next({ status: 400, message: "body must have[] data property" });
+    next({ status: 400, message: "body must have data property" });
   }
   const needsProperties = [
     "first_name",
@@ -107,6 +127,7 @@ async function create(req, res) {
 
 module.exports = {
   list: [hasDate, asyncErrorBoundary(list)],
+  read: [asyncErrorBoundary(reservationExists), read],
   create: [
     hasValidProperties,
     hasValidTime,
