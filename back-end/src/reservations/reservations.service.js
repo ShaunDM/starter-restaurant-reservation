@@ -15,8 +15,17 @@ async function create(newReservation) {
   return knex("reservations").insert(newReservation).returning("*");
 }
 
+async function update(reservation) {
+  return knex("reservations")
+    .where({ reservation_id: reservation.reservation_id })
+    .first()
+    .returning("*")
+    .update(reservation);
+}
+
 module.exports = {
   list,
   create,
   read,
+  update,
 };
