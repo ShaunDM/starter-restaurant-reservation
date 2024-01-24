@@ -46,7 +46,6 @@ function read(req, res) {
 function hasValidDate(req, res, next) {
   const { reservation_date, reservation_time } = req.body.data;
   const date = new Date(reservation_date.concat(", ", reservation_time));
-  console.log(date);
   if (Number.isNaN(Date.parse(date))) {
     next({ status: 400, message: "reservation_date is not a date." });
   }
@@ -83,7 +82,6 @@ function hasValidTime(req, res, next) {
 
 function hasValidPeople(req, res, next) {
   const { people } = req.body.data;
-  console.log(people, Number.isInteger(people));
   if (!Number.isInteger(people)) {
     next({ status: 400, message: "Property people is not a number." });
   }

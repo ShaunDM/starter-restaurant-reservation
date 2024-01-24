@@ -3,7 +3,7 @@ const knex = require("../db/connection");
 async function list() {
   return knex("tables as t")
     .join("tables_reservations as tr", "t.table_id", "tr.table_id")
-    .select("t.*", "tr.available")
+    .select("t.table_name", "t.table_id", "t.capacity", "tr.reservation_id")
     .orderBy("t.table_name");
 }
 
@@ -14,8 +14,11 @@ async function create(newTable) {
     .then((createdTables) => createdTables[0]);
 }
 
-async function insertTableToTableReservations(newTable) {
-  return knex("tables_reservations").insert({ table_id: newTable.table_id });
+async function insertTableToTableReservations(table_id, reservation_id) {
+  return knex("tables_reservations").insert({
+    table_id: table_id,
+    reservation_id: reservation_id,
+  });
 }
 
 async function readTable(id) {
@@ -34,12 +37,16 @@ async function readReservation(id) {
 }
 
 async function update(table) {
-  const table_id = table.table_id;
+  const { table_id } = table;
   return knex("tables_reservations")
     .returning("*")
     .where({ table_id: table_id })
     .first()
     .update(table);
+}
+
+async function destroy(id) {
+  return knex("tables_reservations").where({ table_id: id }).del();
 }
 
 module.exports = {
@@ -50,4 +57,5 @@ module.exports = {
   readAvailable,
   readReservation,
   update,
+  destroy,
 };

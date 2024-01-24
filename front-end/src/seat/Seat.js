@@ -60,7 +60,7 @@ function Seat() {
     </tr>
   ));
   const list = tables.map((table) => (
-    <option value={table.table_id}>
+    <option key={table.table_id} value={table.table_id}>
       {`${table.table_name} - ${table.capacity}`}
     </option>
   ));

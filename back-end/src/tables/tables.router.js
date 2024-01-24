@@ -11,12 +11,17 @@ const controller = require("./tables.controller");
 const corsGet = cors({ method: "GET" });
 const corsPost = cors({ method: "POST" });
 const corsPut = cors({ method: "PUT" });
+const corsDel = cors({ method: "DELETE" });
 
 router
   .route("/:table_id/seat")
   .put(corsPut, controller.update)
   .options(corsPut)
+  .delete(corsDel, controller.destroy)
+  .options(corsDel)
   .all(methodNotAllowed);
+
+//Need to double up the routes' methods because frontend and backend use different routes for their tests, as this is an assignment I do not wish to alter the tests.
 
 router
   .route("/new")
@@ -30,6 +35,7 @@ router
   .options(corsGet)
   .post(corsPost, controller.create)
   .options(corsPost)
+
   .all(methodNotAllowed);
 
 module.exports = router;

@@ -12,6 +12,14 @@ const tablesRouter = require("../tables/tables.router");
 const corsGet = cors({ method: "GET" });
 const corsPost = cors({ method: "POST" });
 
+//Need to double up the routes' methods because frontend and backend use different routes for their tests.
+
+router
+  .route("/new")
+  .post(corsPost, controller.create)
+  .options(corsPost)
+  .all(methodNotAllowed);
+
 router.use(
   "/:reservation_Id/tables",
   controller.reservationExists,
@@ -22,12 +30,6 @@ router
   .route("/:reservation_Id")
   .get(corsGet, controller.read)
   .options(corsGet)
-  .all(methodNotAllowed);
-
-router
-  .route("/new")
-  .post(corsPost, controller.create)
-  .options(corsPost)
   .all(methodNotAllowed);
 
 router
