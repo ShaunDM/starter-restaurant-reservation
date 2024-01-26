@@ -135,15 +135,15 @@ async function tableIsFree(req, res, next) {
   const isSeated = await service.readAvailable(res.locals.table.table_id);
   if (isSeated.reservation_id) {
     const message = `table_id: ${isSeated.table_id} is occupied`;
-    next({
+    req.log.trace({ __filename, methodName, valid: false }, message);
+    return next({
       status: 400,
       message: message,
     });
-    req.log.trace({ __filename, methodName, valid: false }, message);
   }
   res.locals.table_reservation = isSeated;
   req.log.trace({ __filename, methodName, valid: true, locals: res.locals });
-  return next();
+  next();
 }
 
 async function tableHasCapacity(req, res, next) {
@@ -154,7 +154,7 @@ async function tableHasCapacity(req, res, next) {
   //Need to include the following if statement to pass thinkful tests and maintain Group-by-resource organization otherwise. Thinkful tests do not include multiple params and I don't know how to keep controller and service files inclusive to their table without merging params from another router.
 
   if (!res.locals.reservation) {
-    res.locals.reservation = await reservationExists(req, res, next);
+    await reservationExists(req, res, next);
   }
   const { people } = res.locals.reservation;
   if (capacity < people) {
@@ -172,32 +172,49 @@ async function tableHasCapacity(req, res, next) {
 async function reservationExists(req, res, next) {
   const methodName = "reservationExists";
   req.log.debug({ __filename, methodName, body: req.body });
+  console.log("reservationExists", req.body.data);
   const { reservation_id } = req.body.data;
   const foundReservation = await service.readReservation(reservation_id);
-  if (foundReservation) {
-    req.log.trace({
-      __filename,
-      methodName,
-      valid: true,
-      data: foundReservation,
+  if (!foundReservation) {
+    const message = `reservation_id: ${reservation_id} not found`;
+    req.log.trace({ __filename, methodName, valid: false }, message);
+    return next({
+      status: 404,
+      message: message,
     });
-    return foundReservation;
   }
-  const message = `reservation_id: ${reservation_id} not found`;
-  next({
-    status: 404,
-    message: message,
+  req.log.trace({
+    __filename,
+    methodName,
+    valid: true,
+    data: foundReservation,
   });
-  req.log.trace({ __filename, methodName, valid: false }, message);
+  res.locals.reservation = foundReservation;
 }
 
-async function update(req, res) {
+function reservationIsAlreadySeated(req, res, next) {
+  const methodName = "reservationIsAlreadySeated";
+  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  const { status, reservation_id } = res.locals.reservation;
+  if (status === "seated") {
+    const message = `Reservation: ${reservation_id} is already seated.`;
+    return next({ status: 400, message: message });
+  }
+  next();
+}
+
+async function update(req, res, next) {
   const methodName = "update";
   req.log.debug({ __filename, methodName, locals: res.locals });
   const reservationUpdate = {
     ...res.locals.table_reservation,
     reservation_id: res.locals.reservation.reservation_id,
   };
+  res.locals.reservationStatusUpdate = {
+    ...res.locals.reservation,
+    status: "seated",
+  };
+  await updateReservations(req, res, next);
   res.status(200).json({
     data: await service.update(reservationUpdate),
   });
@@ -222,8 +239,51 @@ async function isOccupied(req, res, next) {
   const methodName = "isOccupied";
   req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
   const isSeated = await service.readAvailable(res.locals.table.table_id);
+  console.log("isOccupied", res.locals.reservation);
+  if (!res.locals.reservation) {
+    await reservationExists(req, res, next);
+  }
   if (!isSeated.reservation_id) {
     const message = `table_id: ${isSeated.table_id} is not occupied`;
+    req.log.trace({ __filename, methodName, valid: false }, message);
+    return next({
+      status: 400,
+      message: message,
+    });
+  }
+  next();
+  req.log.trace({ __filename, methodName, valid: true });
+}
+
+async function destroy(req, res, next) {
+  const methodName = "update";
+  req.log.debug({ __filename, methodName, locals: res.locals });
+  const { table_id } = res.locals.table;
+  await service.destroy(table_id);
+  await service.insertTableToTableReservations(table_id);
+  res.locals.reservationStatusUpdate = {
+    ...res.locals.reservation,
+    status: "finished",
+  };
+  await updateReservations(req, res, next);
+  res.status(200).json({ data: res.locals.table });
+  req.log.trace({
+    __filename,
+    methodName,
+    return: true,
+    data: res.locals.table,
+  });
+}
+
+//reservations update
+
+function reservationStatusIsNotFinished(req, res, next) {
+  const methodName = "reservationStatusIsNotFinished";
+  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  const { status } = res.locals.reservation;
+  if (status === "finished") {
+    const message =
+      "Reservation status cannot be updated if it is already 'finished'.";
     next({
       status: 400,
       message: message,
@@ -234,18 +294,44 @@ async function isOccupied(req, res, next) {
   req.log.trace({ __filename, methodName, valid: true });
 }
 
-async function destroy(req, res) {
-  const methodName = "update";
-  req.log.debug({ __filename, methodName, locals: res.locals });
-  const { table_id } = res.locals.table;
-  await service.destroy(table_id);
-  await service.insertTableToTableReservations(table_id);
-  res.status(200).json({ data: res.locals.table });
+function hasValidStatus(req, res, next) {
+  const methodName = "hasValidStatus";
+  req.log.debug({ __filename, methodName, body: req.body });
+  const { status } = res.locals.reservationStatusUpdate;
+  if (!status) {
+    const message = "Status update is undefined";
+    next({
+      status: 400,
+      message: message,
+    });
+    req.log.trace({ __filename, methodName, valid: false }, message);
+  }
+  const validStatuses = ["booked", "seated", "finished"];
+  if (!validStatuses.includes(status)) {
+    const statusList = validStatuses.join(", ");
+    const message = `Reservation status: ${status} is invalid, valid statuses are: ${statusList}.`;
+    req.log.trace({ __filename, methodName, valid: false }, message);
+    return next({
+      status: 400,
+      message: message,
+    });
+  }
+  req.log.trace({ __filename, methodName, valid: true });
+}
+
+async function updateReservations(req, res, next) {
+  hasValidStatus(req, res, next);
+  const methodName = "updateReservations";
+  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  const reservationUpdate = res.locals.reservationStatusUpdate;
+  const updatedReservation = await service.updateReservations(
+    reservationUpdate
+  );
   req.log.trace({
     __filename,
     methodName,
     return: true,
-    data: res.locals.table,
+    data: updatedReservation[0],
   });
 }
 
@@ -262,11 +348,14 @@ module.exports = {
     asyncErrorBoundary(tableExists),
     asyncErrorBoundary(tableIsFree),
     asyncErrorBoundary(tableHasCapacity),
+    reservationIsAlreadySeated,
+    reservationStatusIsNotFinished,
     asyncErrorBoundary(update),
   ],
   destroy: [
     asyncErrorBoundary(tableExists),
     asyncErrorBoundary(isOccupied),
+    reservationStatusIsNotFinished,
     asyncErrorBoundary(destroy),
   ],
 };

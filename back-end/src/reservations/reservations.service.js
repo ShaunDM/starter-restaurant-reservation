@@ -1,10 +1,17 @@
 const knex = require("../db/connection");
 
-async function list(date) {
+async function listByDate(value) {
   return knex("reservations")
     .select("*")
-    .where({ reservation_date: date })
+    .where({ reservation_date: value })
+    .whereNot({ status: "finished" })
     .orderBy("reservation_time");
+}
+async function listBySearch(value) {
+  return knex("reservations")
+    .where("mobile_number", "like", value)
+    .select("*")
+    .orderBy("reservation_date");
 }
 
 async function read(id) {
@@ -23,8 +30,15 @@ async function update(reservation) {
     .update(reservation);
 }
 
+async function search(number) {
+  return knex("reservations")
+    .whereLike("mobile_number", `%${number}%`)
+    .select("*");
+}
+
 module.exports = {
-  list,
+  listByDate,
+  listBySearch,
   create,
   read,
   update,

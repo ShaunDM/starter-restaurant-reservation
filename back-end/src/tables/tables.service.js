@@ -49,6 +49,14 @@ async function destroy(id) {
   return knex("tables_reservations").where({ table_id: id }).del();
 }
 
+async function updateReservations(reservation) {
+  console.log(reservation);
+  return knex("reservations")
+    .where({ reservation_id: reservation.reservation_id })
+    .first()
+    .update(reservation);
+}
+
 module.exports = {
   list,
   create,
@@ -58,4 +66,5 @@ module.exports = {
   readReservation,
   update,
   destroy,
+  updateReservations,
 };

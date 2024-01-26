@@ -21,6 +21,12 @@ router
   .options(corsPost)
   .all(methodNotAllowed);
 
+router
+  .route("/mobile_number?")
+  .get(corsGet, controller.search)
+  .options(corsGet)
+  .all(methodNotAllowed);
+
 router.use(
   "/:reservation_Id/tables",
   controller.reservationExists,
@@ -29,8 +35,7 @@ router.use(
 
 router
   .route("/:reservation_Id/status")
-  .put(corsPut, controller.update)
-  .options(corsPut)
+  .put(controller.update)
   .all(methodNotAllowed);
 
 router

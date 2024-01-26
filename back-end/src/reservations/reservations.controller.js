@@ -4,17 +4,34 @@
 const service = require("./reservations.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
-function hasDate(req, res, next) {
-  const methodName = "hasDate";
-  req.log.debug({ __filename, methodName, body: req.body });
-  if (!req.query.date) {
-    const message =
-      "A date must be given to fetch the according reservation list.";
-    next({
-      status: 400,
-      message: message,
-    });
-    req.log.trace({ __filename, methodName, valid: false }, message);
+function hasQuery(req, res, next) {
+  const methodName = "hasQuery";
+  req.log.debug({ __filename, methodName, query: req.query });
+  if (Object.hasOwn(req.query, "date")) {
+    if (!req.query.date) {
+      const message =
+        "A date must be given to fetch the according reservation list.";
+      next({
+        status: 400,
+        message: message,
+      });
+      req.log.trace({ __filename, methodName, valid: false }, message);
+    }
+    res.locals.key = "date";
+    res.locals.value = req.query.date;
+  } else if (Object.hasOwn(req.query, "mobile_number")) {
+    if (!req.query.mobile_number) {
+      const message =
+        "A mobile_number must be given to fetch the according reservation list.";
+      next({
+        status: 400,
+        message: message,
+      });
+      req.log.trace({ __filename, methodName, valid: false }, message);
+    }
+    console.log(req.query.mobile_number);
+    res.locals.key = "mobile_number";
+    res.locals.value = `%${req.query.mobile_number}%`;
   }
   req.log.trace({ __filename, methodName, valid: true });
   next();
@@ -22,8 +39,18 @@ function hasDate(req, res, next) {
 
 async function list(req, res) {
   const methodName = "list";
-  req.log.debug({ __filename, methodName });
-  const data = await service.list(req.query.date);
+  req.log.debug({
+    __filename,
+    methodName,
+    locals: res.locals,
+  });
+  console.log("query", res.locals.value);
+  let data = [];
+  if (res.locals.key === "date") {
+    data = await service.listByDate(res.locals.value);
+  } else {
+    data = await service.listBySearch(res.locals.value);
+  }
   res.json({
     data: data,
   });
@@ -32,11 +59,13 @@ async function list(req, res) {
 
 async function reservationExists(req, res, next) {
   const methodName = "reservationExists";
+  console.log("reservation");
   req.log.debug({ __filename, methodName, body: req.body, params: req.params });
   const { reservation_Id } = req.params;
   const foundReservation = await service.read(reservation_Id);
   if (foundReservation) {
     req.log.trace({ __filename, methodName, valid: true, locals: res.locals });
+    console.log("reservation", foundReservation);
     res.locals.reservation = foundReservation;
     return next();
   }
@@ -49,14 +78,10 @@ function read(req, res) {
   const methodName = "read";
   req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
   const { reservation } = res.locals;
-  const data = {
-    reservation_id: reservation.reservation_id,
-    reservation: reservation,
-  };
   res.status(200).json({
-    data: data,
+    data: reservation,
   });
-  req.log.trace({ __filename, methodName, return: true, data: data });
+  req.log.trace({ __filename, methodName, return: true, data: reservation });
 }
 
 //checks the day of the week to ensure valid, concat adds time element so that it's not checking against an inappropriate time zone upon date creation.
@@ -213,13 +238,13 @@ function reservationStatusIsNotFinished(req, res, next) {
     });
     req.log.trace({ __filename, methodName, valid: false }, message);
   }
+  next();
 }
 
 function hasValidStatus(req, res, next) {
   const methodName = "hasValidStatus";
   req.log.debug({ __filename, methodName, body: req.body });
   const { status } = req.body.data;
-  console.log(status);
   if (!status) {
     const message = "Status update is undefined";
     next({
@@ -232,8 +257,8 @@ function hasValidStatus(req, res, next) {
   if (validStatuses.includes(status)) {
     return next();
   }
-  const message = `Reservation status: ${status} is invalid, valid statuses are: ${statusList}.`;
   const statusList = validStatuses.join(", ");
+  const message = `Reservation status: ${status} is invalid, valid statuses are: ${statusList}.`;
   next({
     status: 400,
     message: message,
@@ -248,17 +273,34 @@ async function update(req, res) {
     ...res.locals.reservation,
     status: req.body.data.status,
   };
-  res.status(200).json({ data: await service.update(reservationUpdate) });
+
+  const updatedReservation = await service.update(reservationUpdate);
+  res.status(200).json({ data: updatedReservation[0] });
   req.log.trace({
     __filename,
     methodName,
     return: true,
-    data: reservationUpdate,
+    data: updatedReservation[0],
+  });
+}
+
+//Search list
+
+async function search(req, res) {
+  const methodName = "search";
+  req.log.debug({ __filename, methodName, query: req.query });
+  const data = await service.search(req.query.mobile_number);
+  res.status(200).json({ data: data });
+  req.log.trace({
+    __filename,
+    methodName,
+    return: true,
+    data: data,
   });
 }
 
 module.exports = {
-  list: [hasDate, asyncErrorBoundary(list)],
+  list: [hasQuery, asyncErrorBoundary(list)],
   read: [asyncErrorBoundary(reservationExists), read],
   create: [
     hasValidProperties,
@@ -274,5 +316,6 @@ module.exports = {
     hasValidStatus,
     asyncErrorBoundary(update),
   ],
+  search,
   reservationExists,
 };

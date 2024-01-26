@@ -33,7 +33,6 @@ function Seat() {
   }
 
   function cancelHandler() {
-    console.log(history);
     history.goBack();
   }
 

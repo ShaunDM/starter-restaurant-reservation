@@ -17,7 +17,7 @@ function Dashboard({ date }) {
   const [reservationsError, setReservationsError] = useState(null);
   const [tables, setTables] = useState([]);
   const [tablesError, setTablesError] = useState(null);
-  const [finish, setFinish] = useState(null);
+  const [finish, setFinish] = useState({ reservation_id: "", table_id: "" });
 
   const history = useHistory();
 
@@ -46,12 +46,14 @@ function Dashboard({ date }) {
   function seatNewGuests() {
     const abortController = new AbortController();
     setTablesError(null);
-    if (finish) {
+    console.log(finish);
+    if (finish.table_id && finish.reservation_id) {
       if (
         window.confirm(
           "Is this table ready to seat new guests? This cannot be undone."
         )
       ) {
+        console.log(finish);
         finishTable(finish, abortController.signal)
           .then(() => history.go(0))
           .catch((err) => {
@@ -59,38 +61,61 @@ function Dashboard({ date }) {
           });
         return () => abortController.abort();
       }
-      setFinish(null);
     }
     return () => abortController.abort();
   }
 
   function handleFinish({ target }) {
-    console.log(target.value);
-    setFinish(target.value);
+    setFinish({
+      reservation_id: target.id,
+      table_id: target.value,
+    });
   }
 
-  const reservationRows = reservations.map((reservation) => (
-    <tr key={reservation.reservation_id}>
-      <th scope="row">{reservation.reservation_id}</th>
-      <td>{reservation.first_name}</td>
-      <td>{reservation.last_name}</td>
-      <td>{reservation.mobile_number}</td>
-      <td>{reservation.reservation_date}</td>
-      <td>{reservation.reservation_time}</td>
-      <td>{reservation.people}</td>
-      <td data-reservation-id-status={reservation.reservation_id}>
-        <Link
-          to={`/reservations/${reservation.reservation_id}/seat`}
-          className="btn btn-primary"
-        >
-          Seat
-        </Link>
-      </td>
-    </tr>
-  ));
+  const reservationRows = reservations.map((reservation) => {
+    if (reservation.status === "seated") {
+      return (
+        <tr key={reservation.reservation_id}>
+          <th scope="row">{reservation.reservation_id}</th>
+          <td>{reservation.first_name}</td>
+          <td>{reservation.last_name}</td>
+          <td>{reservation.mobile_number}</td>
+          <td>{reservation.reservation_date}</td>
+          <td>{reservation.reservation_time}</td>
+          <td>{reservation.people}</td>
+          <td data-reservation-id-status={reservation.reservation_id}>
+            {reservation.status}
+          </td>
+        </tr>
+      );
+    }
+    return (
+      <tr key={reservation.reservation_id}>
+        <th scope="row">{reservation.reservation_id}</th>
+        <td>{reservation.first_name}</td>
+        <td>{reservation.last_name}</td>
+        <td>{reservation.mobile_number}</td>
+        <td>{reservation.reservation_date}</td>
+        <td>{reservation.reservation_time}</td>
+        <td>{reservation.people}</td>
+        <td data-reservation-id-status={reservation.reservation_id}>
+          {reservation.status}
+        </td>
+        <td data-reservation-id-status={reservation.reservation_id}>
+          <Link
+            to={`/reservations/${reservation.reservation_id}/seat`}
+            className="btn btn-primary"
+          >
+            Seat
+          </Link>
+        </td>
+      </tr>
+    );
+  });
 
   const tableRows = tables.map((table) => {
     if (table.reservation_id) {
+      console.log(table);
       return (
         <tr key={table.table_id}>
           <th scope="row">{table.table_id}</th>
@@ -103,6 +128,7 @@ function Dashboard({ date }) {
               className="btn btn-secondary mr-2"
               data-table-id-finish={table.table_id}
               value={table.table_id}
+              id={table.reservation_id}
               onClick={handleFinish}
             >
               Finish
@@ -144,6 +170,7 @@ function Dashboard({ date }) {
               <th scope="col">Reservation Date</th>
               <th scope="col">Reservation Time</th>
               <th scope="col">People</th>
+              <th scope="col">Status</th>
             </tr>
           </thead>
           <tbody>{reservationRows}</tbody>

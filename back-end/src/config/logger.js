@@ -9,7 +9,7 @@ const prettyPrint = nodeEnv === "development";
 const logger = pinoHttp({
   genReqId: (request) => request.headers["x-request-id"] || nanoid(),
   level,
-  prettyPrint,
+  prettyPrint: true,
 });
 
 module.exports = logger;
