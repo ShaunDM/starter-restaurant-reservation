@@ -5,8 +5,16 @@ import {
 } from "react-router-dom/cjs/react-router-dom.min";
 import ErrorAlert from "../layout/ErrorAlert";
 import { listTables, seatTable, readReservation } from "../utils/api";
+// import logger from "../utils/logger";
 
-function Seat() {
+function SeatTable() {
+  // const file_name = "SeatTable";
+  // logger.info({
+  //   file_name,
+  //   method_name: file_name,
+  //   message: `started ${file_name}`,
+  // });
+
   const { reservation_id } = useParams();
   const [reservation, setReservation] = useState({});
   const [reservationErr, setReservationErr] = useState(null);
@@ -22,29 +30,80 @@ function Seat() {
   useEffect(loadDashboard, [reservation_id]);
 
   function loadDashboard() {
+    // const method_name = "loadDashboard";
+    // logger.debug({
+    //   file_name,
+    //   method_name,
+    //   message: `started ${method_name}`,
+    // });
+
     const abortController = new AbortController();
     setReservationErr(null);
     readReservation(reservation_id, abortController.signal)
-      .then(setReservation)
+      .then((response) => {
+        // logger.trace({
+        //   file_name,
+        //   method_name: `${method_name}/readReservation`,
+        //   message: `valid`,
+        //   params: `Response: ${response}`,
+        // });
+        setReservation(response);
+      })
       .catch(setReservationErr);
     setTablesError(null);
-    listTables(abortController.signal).then(setTables).catch(setTablesError);
+    listTables(abortController.signal)
+      .then((response) => {
+        // logger.trace({
+        //   file_name,
+        //   method_name: `${method_name}/listTables`,
+        //   message: `valid`,
+        //   params: `Response: ${response}`,
+        // });
+        setTables(response);
+      })
+      .catch(setTablesError);
     return () => abortController.abort();
   }
 
   function cancelHandler() {
+    // const method_name = "cancelHandler";
+    // logger.debug({
+    //   file_name,
+    //   method_name,
+    //   message: `started ${method_name}`,
+    // });
     history.goBack();
   }
 
   function changeHandler({ target }) {
+    // const method_name = "changeHandler";
+    // logger.trace({
+    //   file_name,
+    //   method_name,
+    //   message: `started ${method_name}`,
+    //   params: `target: ${target}`,
+    // });
     setSeat({ ...seat, table_id: target.value });
   }
 
   function submitHandler(event) {
+    // const method_name = "submitHandler";
+    // logger.debug({
+    //   file_name,
+    //   method_name,
+    //   message: `started ${method_name}`,
+    //   params: `seat: ${seat}`,
+    // });
     event.preventDefault();
     setSubmitError(null);
     seatTable(seat)
-      .then(() => {
+      .then((response) => {
+        // logger.trace({
+        //   file_name,
+        //   method_name: `${method_name}/seatTable`,
+        //   message: `valid`,
+        //   params: `Response: ${response}`,
+        // });
         history.push("/");
       })
       .catch(setSubmitError);
@@ -118,4 +177,4 @@ function Seat() {
   );
 }
 
-export default Seat;
+export default SeatTable;

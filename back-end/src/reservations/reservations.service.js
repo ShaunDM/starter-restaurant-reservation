@@ -5,6 +5,7 @@ async function listByDate(value) {
     .select("*")
     .where({ reservation_date: value })
     .whereNot({ status: "finished" })
+    .whereNot({ status: "cancelled" })
     .orderBy("reservation_time");
 }
 async function listBySearch(value) {

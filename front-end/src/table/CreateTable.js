@@ -2,8 +2,15 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { createTable } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
+// import logger from "../utils/logger";
 
-function TableCreate() {
+function CreateTable() {
+  // const file_name = "SeatTable";
+  // logger.info({
+  //   file_name,
+  //   method_name: file_name,
+  //   message: `started ${file_name}`,
+  // });
   const history = useHistory();
   const [error, setError] = useState(null);
 
@@ -13,10 +20,23 @@ function TableCreate() {
   });
 
   function cancelHandler() {
+    // const method_name = "cancelHandler";
+    // logger.debug({
+    //   file_name,
+    //   method_name,
+    //   message: `started ${method_name}`,
+    // });
     history.goBack();
   }
 
-  function changeHandler({ target: { name, value } }) {
+  function changeHandler({ target, target: { name, value } }) {
+    // const method_name = "changeHandler";
+    // logger.trace({
+    //   file_name,
+    //   method_name,
+    //   message: `started ${method_name}`,
+    //   params: `target: ${target}`,
+    // });
     if (name === "capacity") {
       setTable((previousTable) => ({
         ...previousTable,
@@ -31,9 +51,22 @@ function TableCreate() {
   }
 
   function submitHandler(event) {
+    // const method_name = "submitHandler";
+    // logger.debug({
+    //   file_name,
+    //   method_name,
+    //   message: `started ${method_name}`,
+    //   params: `table: ${table}`,
+    // });
     event.preventDefault();
     createTable(table)
-      .then(() => {
+      .then((response) => {
+        // logger.trace({
+        //   file_name,
+        //   method_name: `${method_name}/createTable`,
+        //   message: `valid`,
+        //   params: `Response: ${response}`,
+        // });
         history.push("/");
       })
       .catch(setError);
@@ -93,4 +126,4 @@ function TableCreate() {
   );
 }
 
-export default TableCreate;
+export default CreateTable;

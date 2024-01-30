@@ -102,7 +102,9 @@ export async function createTable(table, signal) {
 
 export async function readReservation(reservation_id, signal) {
   const url = `${API_BASE_URL}/reservations/${reservation_id}`;
-  return await fetchJson(url, { headers, signal }, []);
+  return await fetchJson(url, { headers, signal }, [])
+    .then(formatReservationDate)
+    .then(formatReservationTime);
 }
 
 export async function seatTable(seat, signal) {
@@ -117,7 +119,6 @@ export async function seatTable(seat, signal) {
 }
 
 export async function finishTable(finish, signal) {
-  console.log(finish);
   const url = `${API_BASE_URL}/reservations/${finish.reservation_id}/tables/${finish.table_id}/seat`;
   const options = {
     method: "DELETE",
@@ -139,10 +140,41 @@ export async function changeReservationStatus(updatedReservation, signal) {
   return await fetchJson(url, options);
 }
 
-export async function searchReservations(search, signal) {
-  console.log(search);
-  const url = `${API_BASE_URL}/reservations?mobile_number=${search}`;
+export async function searchReservations(query, signal) {
+  const url = `${API_BASE_URL}/reservations?mobile_number=${query}`;
   return await fetchJson(url, { headers, signal }, [])
     .then(formatReservationDate)
     .then(formatReservationTime);
+}
+
+export async function updateReservation(updatedReservation, signal) {
+  const { reservation_id } = updatedReservation;
+  const url = `${API_BASE_URL}/reservations/${reservation_id}`;
+  const options = {
+    method: "PUT",
+    headers,
+    body: JSON.stringify({ data: updatedReservation }),
+    signal,
+  };
+  return await fetchJson(url, options);
+}
+
+export async function listLogs(signal) {
+  const url = new URL(`${API_BASE_URL}/logging`);
+  const options = {
+    method: "GET",
+    headers,
+    signal,
+  };
+  return await fetchJson(url, options);
+}
+
+export async function truncate(signal) {
+  const url = `${API_BASE_URL}/logging`;
+  const options = {
+    method: "DELETE",
+    headers,
+    signal,
+  };
+  return await fetchJson(url, options);
 }

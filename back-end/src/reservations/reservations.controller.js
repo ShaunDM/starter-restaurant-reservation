@@ -29,7 +29,6 @@ function hasQuery(req, res, next) {
       });
       req.log.trace({ __filename, methodName, valid: false }, message);
     }
-    console.log(req.query.mobile_number);
     res.locals.key = "mobile_number";
     res.locals.value = `%${req.query.mobile_number}%`;
   }
@@ -44,7 +43,6 @@ async function list(req, res) {
     methodName,
     locals: res.locals,
   });
-  console.log("query", res.locals.value);
   let data = [];
   if (res.locals.key === "date") {
     data = await service.listByDate(res.locals.value);
@@ -59,14 +57,12 @@ async function list(req, res) {
 
 async function reservationExists(req, res, next) {
   const methodName = "reservationExists";
-  console.log("reservation");
   req.log.debug({ __filename, methodName, body: req.body, params: req.params });
   const { reservation_Id } = req.params;
   const foundReservation = await service.read(reservation_Id);
   if (foundReservation) {
-    req.log.trace({ __filename, methodName, valid: true, locals: res.locals });
-    console.log("reservation", foundReservation);
     res.locals.reservation = foundReservation;
+    req.log.trace({ __filename, methodName, valid: true, locals: res.locals });
     return next();
   }
   const message = `reservation_id: ${reservation_Id} not found`;
@@ -253,7 +249,7 @@ function hasValidStatus(req, res, next) {
     });
     req.log.trace({ __filename, methodName, valid: false }, message);
   }
-  const validStatuses = ["booked", "seated", "finished"];
+  const validStatuses = ["booked", "seated", "finished", "cancelled"];
   if (validStatuses.includes(status)) {
     return next();
   }
@@ -268,7 +264,19 @@ function hasValidStatus(req, res, next) {
 
 async function update(req, res) {
   const methodName = "update";
-  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  req.log.debug({ __filename, methodName, body: req.body });
+  const updatedReservation = await service.update(req.body.data);
+  res.status(200).json({ data: updatedReservation[0] });
+  req.log.trace({
+    __filename,
+    methodName,
+    return: true,
+    data: updatedReservation[0],
+  });
+}
+async function updateStatus(req, res) {
+  const methodName = "update";
+  req.log.debug({ __filename, methodName, body: req.body });
   const reservationUpdate = {
     ...res.locals.reservation,
     status: req.body.data.status,
@@ -312,9 +320,17 @@ module.exports = {
   ],
   update: [
     asyncErrorBoundary(reservationExists),
+    hasValidProperties,
+    hasValidTime,
+    hasValidDate,
+    hasValidPeople,
+    asyncErrorBoundary(update),
+  ],
+  updateStatus: [
+    asyncErrorBoundary(reservationExists),
     reservationStatusIsNotFinished,
     hasValidStatus,
-    asyncErrorBoundary(update),
+    asyncErrorBoundary(updateStatus),
   ],
   search,
   reservationExists,

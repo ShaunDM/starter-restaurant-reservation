@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, Link, useHistory } from "react-router-dom";
-import { listReservations, listTables, finishTable } from "../utils/api";
+import {
+  listReservations,
+  listTables,
+  finishTable,
+  changeReservationStatus,
+  readReservation,
+} from "../utils/api";
+import Nav from "./Nav";
 import ErrorAlert from "../layout/ErrorAlert";
-import DashboardClean from "./DashboardClean";
-
-/*For some reason test -04: seat button has href with /reservations/${reservation_id}/seat, has a timeout error when using DashboardClean. As such this Dashboard has to be used as I don't want to alter tests for an assignment.*/
+// import logger from "../utils/logger";
+/*For some reason test -05 and higher fail if I use dashboardClean in ignore file, so I'm sticking with this...*/
 
 /**
  * Defines the dashboard page.
@@ -13,11 +19,13 @@ import DashboardClean from "./DashboardClean";
  * @returns {JSX.Element}
  */
 function Dashboard({ date }) {
+  // const file_name = "Dashboard";
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
   const [tables, setTables] = useState([]);
   const [tablesError, setTablesError] = useState(null);
   const [finish, setFinish] = useState({ reservation_id: "", table_id: "" });
+  const [error, setError] = useState(null);
 
   const history = useHistory();
 
@@ -41,19 +49,17 @@ function Dashboard({ date }) {
     return () => abortController.abort();
   }
 
-  useEffect(seatNewGuests, [finish]);
+  useEffect(seatNewGuests, [finish, history]);
 
   function seatNewGuests() {
     const abortController = new AbortController();
     setTablesError(null);
-    console.log(finish);
     if (finish.table_id && finish.reservation_id) {
       if (
         window.confirm(
           "Is this table ready to seat new guests? This cannot be undone."
         )
       ) {
-        console.log(finish);
         finishTable(finish, abortController.signal)
           .then(() => history.go(0))
           .catch((err) => {
@@ -72,6 +78,39 @@ function Dashboard({ date }) {
     });
   }
 
+  function cancelHandler({ target }) {
+    // const method_name = "cancelHandler";
+    // logger.debug({
+    //   file_name,
+    //   method_name,
+    //   message: `started ${method_name}`,
+    // });
+
+    if (window.confirm("Do you want to cancel this reservation?")) {
+      const abortController = new AbortController();
+      setError(null);
+      readReservation(target.value, abortController.signal).then((result) =>
+        changeReservationStatus(
+          { ...result, status: "cancelled" },
+          abortController.signal
+        )
+          .then((response) => {
+            // logger.trace({
+            //   file_name,
+            //   method_name: `${method_name}/readReservation`,
+            //   message: `valid`,
+            //   params: `Response: ${response}`,
+            // });
+            history.go(0);
+          })
+          .catch((err) => {
+            setError(err);
+          })
+      );
+      return () => abortController.abort();
+    }
+  }
+
   const reservationRows = reservations.map((reservation) => {
     if (reservation.status === "seated") {
       return (
@@ -85,6 +124,24 @@ function Dashboard({ date }) {
           <td>{reservation.people}</td>
           <td data-reservation-id-status={reservation.reservation_id}>
             {reservation.status}
+          </td>
+          <td data-reservation-id-status={reservation.reservation_id}>
+            <Link
+              to={`/reservations/${reservation.reservation_id}/edit`}
+              className="btn btn-primary"
+            >
+              Edit
+            </Link>
+          </td>
+          <td data-reservation-id-cancel={reservation.reservation_id}>
+            <button
+              className="btn btn-primary"
+              type="button"
+              onClick={cancelHandler}
+              value={reservation.reservation_id}
+            >
+              Cancel
+            </button>
           </td>
         </tr>
       );
@@ -108,6 +165,25 @@ function Dashboard({ date }) {
           >
             Seat
           </Link>
+        </td>
+        <td data-reservation-id-status={reservation.reservation_id}>
+          <Link
+            to={`/reservations/${reservation.reservation_id}/edit`}
+            className="btn btn-primary"
+          >
+            Edit
+          </Link>
+        </td>
+        <td data-reservation-id-cancel={reservation.reservation_id}>
+          <button
+            className="btn btn-primary"
+            type="button"
+            onClick={cancelHandler}
+            data-reservation-id-cancel={reservation.reservation_id}
+            value={reservation.reservation_id}
+          >
+            Cancel Reservation
+          </button>
         </td>
       </tr>
     );
@@ -151,14 +227,10 @@ function Dashboard({ date }) {
 
   return (
     <main>
-      <nav>
-        <h1>Dashboard</h1>
-        <div className="d-md-flex mb-3">
-          <h4 className="mb-0">{`Reservations for date: ${date}`}</h4>
-        </div>
-      </nav>
+      <Nav date={date} />
       <ErrorAlert error={reservationsError} />
       <ErrorAlert error={tablesError} />
+      <ErrorAlert error={error} />
       <section>
         <table className="table">
           <thead>

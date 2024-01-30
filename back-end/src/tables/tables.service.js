@@ -50,7 +50,6 @@ async function destroy(id) {
 }
 
 async function updateReservations(reservation) {
-  console.log(reservation);
   return knex("reservations")
     .where({ reservation_id: reservation.reservation_id })
     .first()

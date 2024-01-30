@@ -35,13 +35,16 @@ router.use(
 
 router
   .route("/:reservation_Id/status")
-  .put(controller.update)
+  .put(corsPut, controller.updateStatus)
+  .options(corsPut)
   .all(methodNotAllowed);
 
 router
   .route("/:reservation_Id")
   .get(corsGet, controller.read)
   .options(corsGet)
+  .put(corsPut, controller.update)
+  .options(corsPut)
   .all(methodNotAllowed);
 
 router

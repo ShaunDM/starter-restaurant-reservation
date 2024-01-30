@@ -172,7 +172,6 @@ async function tableHasCapacity(req, res, next) {
 async function reservationExists(req, res, next) {
   const methodName = "reservationExists";
   req.log.debug({ __filename, methodName, body: req.body });
-  console.log("reservationExists", req.body.data);
   const { reservation_id } = req.body.data;
   const foundReservation = await service.readReservation(reservation_id);
   if (!foundReservation) {
@@ -239,7 +238,6 @@ async function isOccupied(req, res, next) {
   const methodName = "isOccupied";
   req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
   const isSeated = await service.readAvailable(res.locals.table.table_id);
-  console.log("isOccupied", res.locals.reservation);
   if (!res.locals.reservation) {
     await reservationExists(req, res, next);
   }

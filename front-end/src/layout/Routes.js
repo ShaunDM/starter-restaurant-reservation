@@ -1,11 +1,12 @@
 import React from "react";
-
 import { Redirect, Route, Switch } from "react-router-dom";
 import Dashboard from "../dashboard/Dashboard";
-import ReservationCreate from "../reservationCreate/ReservationCreate";
-import TableCreate from "../tableCreate/TableCreate";
-import Seat from "../seat/Seat";
-import Search from "../search/Search";
+import CreateReservation from "../reservation/CreateReservation";
+import CreateTable from "../table/CreateTable";
+import SeatTable from "../table/SeatTable";
+import SearchReservations from "../reservation/SearchReservations";
+import EditReservation from "../reservation/EditReservation";
+import Logs from "../logs/Logs";
 import NotFound from "./NotFound";
 import { today } from "../utils/date-time";
 
@@ -20,14 +21,20 @@ import { today } from "../utils/date-time";
 function Routes() {
   return (
     <Switch>
+      <Route exact={true} path="/search">
+        <SearchReservations />
+      </Route>
       <Route path="/reservations/new">
-        <ReservationCreate />
+        <CreateReservation />
       </Route>
       <Route path="/reservations/:reservation_id/seat">
-        <Seat />
+        <SeatTable />
+      </Route>
+      <Route path="/reservations/:reservation_id/edit">
+        <EditReservation />
       </Route>
       <Route path="/tables/new">
-        <TableCreate />
+        <CreateTable />
       </Route>
       <Route exact={true} path="/">
         <Redirect to={"/dashboard"} />
@@ -38,8 +45,8 @@ function Routes() {
       <Route path="/dashboard">
         <Dashboard date={today()} />
       </Route>
-      <Route path="/search">
-        <Search />
+      <Route path="/logs">
+        <Logs />
       </Route>
       <Route>
         <NotFound />
