@@ -2,3 +2,8 @@
   background-color: #393a44;
   min-width: 200px;
 }
+
+.btn-Dashboard {
+  max-width: 150px;
+  max-height: 25px;
+}

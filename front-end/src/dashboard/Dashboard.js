@@ -8,9 +8,11 @@ import {
   readReservation,
 } from "../utils/api";
 import Nav from "./Nav";
+import ReservationsHead from "../reservation/ReservationsTable/ReservationsHead";
 import ErrorAlert from "../layout/ErrorAlert";
 // import logger from "../utils/logger";
-/*For some reason test -05 and higher fail if I use dashboardClean in ignore file, so I'm sticking with this...*/
+
+/*For some reason test -05 and higher fail if I use dashboardClean in ignore directory, so I'm sticking with this...*/
 
 /**
  * Defines the dashboard page.
@@ -20,6 +22,12 @@ import ErrorAlert from "../layout/ErrorAlert";
  */
 function Dashboard({ date }) {
   // const file_name = "Dashboard";
+  // logger.info({
+  //   file_name,
+  //   method_name: file_name,
+  //   message: `started ${file_name}`,
+  // });
+
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
   const [tables, setTables] = useState([]);
@@ -29,19 +37,23 @@ function Dashboard({ date }) {
 
   const history = useHistory();
 
-  //Setting the date variable to the query string, should it exist, here to preserve given code
+  //Setting the date variable to the query string, should it exist.
   const search = useLocation().search;
   const qDate = new URLSearchParams(search).get("date");
   if (qDate) {
     date = qDate;
   }
 
+  const reservationsFound = !reservations.length
+    ? "No reservations"
+    : `Reservations: ${reservations.length}`;
+
   useEffect(loadDashboard, [date]);
 
   function loadDashboard() {
     const abortController = new AbortController();
     setReservationsError(null);
-    listReservations({ date }, abortController.signal)
+    listReservations({ date: date }, abortController.signal)
       .then(setReservations)
       .catch(setReservationsError);
     setTablesError(null);
@@ -52,9 +64,10 @@ function Dashboard({ date }) {
   useEffect(seatNewGuests, [finish, history]);
 
   function seatNewGuests() {
-    const abortController = new AbortController();
-    setTablesError(null);
     if (finish.table_id && finish.reservation_id) {
+      const abortController = new AbortController();
+      setTablesError(null);
+
       if (
         window.confirm(
           "Is this table ready to seat new guests? This cannot be undone."
@@ -68,7 +81,6 @@ function Dashboard({ date }) {
         return () => abortController.abort();
       }
     }
-    return () => abortController.abort();
   }
 
   function handleFinish({ target }) {
@@ -115,7 +127,7 @@ function Dashboard({ date }) {
     if (reservation.status === "seated") {
       return (
         <tr key={reservation.reservation_id}>
-          <th scope="row">{reservation.reservation_id}</th>
+          <td>{reservation.reservation_id}</td>
           <td>{reservation.first_name}</td>
           <td>{reservation.last_name}</td>
           <td>{reservation.mobile_number}</td>
@@ -128,14 +140,14 @@ function Dashboard({ date }) {
           <td data-reservation-id-status={reservation.reservation_id}>
             <Link
               to={`/reservations/${reservation.reservation_id}/edit`}
-              className="btn btn-primary"
+              className="btn btn-info"
             >
               Edit
             </Link>
           </td>
           <td data-reservation-id-cancel={reservation.reservation_id}>
             <button
-              className="btn btn-primary"
+              className="btn btn-danger"
               type="button"
               onClick={cancelHandler}
               value={reservation.reservation_id}
@@ -146,9 +158,10 @@ function Dashboard({ date }) {
         </tr>
       );
     }
+
     return (
       <tr key={reservation.reservation_id}>
-        <th scope="row">{reservation.reservation_id}</th>
+        <td>{reservation.reservation_id}</td>
         <td>{reservation.first_name}</td>
         <td>{reservation.last_name}</td>
         <td>{reservation.mobile_number}</td>
@@ -161,7 +174,7 @@ function Dashboard({ date }) {
         <td data-reservation-id-status={reservation.reservation_id}>
           <Link
             to={`/reservations/${reservation.reservation_id}/seat`}
-            className="btn btn-primary"
+            className="btn btn-dark"
           >
             Seat
           </Link>
@@ -169,20 +182,20 @@ function Dashboard({ date }) {
         <td data-reservation-id-status={reservation.reservation_id}>
           <Link
             to={`/reservations/${reservation.reservation_id}/edit`}
-            className="btn btn-primary"
+            className="btn btn-info"
           >
             Edit
           </Link>
         </td>
         <td data-reservation-id-cancel={reservation.reservation_id}>
           <button
-            className="btn btn-primary"
+            className="btn btn-danger"
             type="button"
             onClick={cancelHandler}
             data-reservation-id-cancel={reservation.reservation_id}
             value={reservation.reservation_id}
           >
-            Cancel Reservation
+            Cancel
           </button>
         </td>
       </tr>
@@ -191,10 +204,9 @@ function Dashboard({ date }) {
 
   const tableRows = tables.map((table) => {
     if (table.reservation_id) {
-      console.log(table);
       return (
         <tr key={table.table_id}>
-          <th scope="row">{table.table_id}</th>
+          <td>{table.table_id}</td>
           <td>{table.table_name}</td>
           <td>{table.capacity}</td>
           <td data-table-id-status={table.table_id}>occupied</td>
@@ -215,7 +227,7 @@ function Dashboard({ date }) {
     }
     return (
       <tr key={table.table_id}>
-        <th scope="row">{table.table_id}</th>
+        <td>{table.table_id}</td>
         <td>{table.table_name}</td>
         <td>{table.capacity}</td>
         <td data-table-id-status={table.table_id}>free</td>
@@ -226,31 +238,20 @@ function Dashboard({ date }) {
   // return <DashboardClean date={date} />;
 
   return (
-    <main>
-      <Nav date={date} />
+    <main className="container-fluid d-flex flex-column p-0">
+      <Nav date={date} reservationsFound={reservationsFound} />
       <ErrorAlert error={reservationsError} />
       <ErrorAlert error={tablesError} />
       <ErrorAlert error={error} />
-      <section>
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">Reservation ID</th>
-              <th scope="col">First Name</th>
-              <th scope="col">Last Name</th>
-              <th scope="col">Mobile Number</th>
-              <th scope="col">Reservation Date</th>
-              <th scope="col">Reservation Time</th>
-              <th scope="col">People</th>
-              <th scope="col">Status</th>
-            </tr>
-          </thead>
+      <section className="row">
+        <table className="table table-striped p-0">
+          <ReservationsHead />
           <tbody>{reservationRows}</tbody>
         </table>
       </section>
-      <section>
-        <table className="table">
-          <thead>
+      <section className="row p-0">
+        <table className="table table-striped">
+          <thead className="thead-dark">
             <tr>
               <th scope="col">Table ID</th>
               <th scope="col">Table Name</th>

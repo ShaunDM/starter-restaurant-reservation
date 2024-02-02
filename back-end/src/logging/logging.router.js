@@ -1,6 +1,10 @@
-/*
- Router for managing frontend logging database.
-*/
+/**
+ * Defines the router for frontend logging resources.
+ *
+ * @type {Router}
+ *
+ * Not fully implemented due to frontend tests failing when utilized.
+ */
 
 const cors = require("cors");
 const router = require("express").Router();

@@ -1,7 +1,15 @@
+/**
+ * Defines the service functions for frontend logging resources.
+ */
+
 const knex = require("../db/connection");
 
-async function list() {
-  return knex("logs as l").select("*").orderBy("l.created_at");
+async function list(level) {
+  console.log("listService", level);
+  return knex("logs")
+    .where("value", ">=", level)
+    .select("*")
+    .orderBy("created_at");
 }
 
 async function create(newLog) {

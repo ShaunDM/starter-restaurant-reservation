@@ -1,17 +1,19 @@
-/*
- Controller for managing frontend logging database.
-*/
+/**
+ * Defines the controller for frontend logging resources.
+ */
+
 const service = require("./logging.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
 async function list(req, res) {
   const methodName = "list";
-  req.log.debug({
+  req.log.info({
     __filename,
     methodName,
     locals: res.locals,
   });
-  let data = await service.list();
+  let { level = 0 } = req.query;
+  let data = await service.list(level);
   res.json({
     data: data,
   });

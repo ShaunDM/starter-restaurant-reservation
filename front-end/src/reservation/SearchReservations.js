@@ -4,6 +4,12 @@ import ReservationsTable from "./ReservationsTable/ReservationsTable";
 import ErrorAlert from "../layout/ErrorAlert";
 // import logger from "../utils/logger";
 
+/**
+ * Defines the search page, user searches for reservations by mobile_number.
+ *
+ * @returns {JSX.Element}
+ */
+
 function SearchReservations() {
   // const file_name = "SearchReservations";
   // logger.info({

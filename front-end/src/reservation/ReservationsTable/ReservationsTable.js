@@ -3,6 +3,13 @@ import ReservationsBody from "./ReservationsBody";
 import ReservationsHead from "./ReservationsHead";
 // import logger from "../../utils/logger";
 
+/**
+ * Renders a list of reservations for various pages, due to causing failures in tests for dashboard, not present in it.
+ * @param reservations
+ *  an array of reservations the user wants to view .
+ * @returns {JSX.Element}
+ */
+
 function ReservationsTable({ reservations }) {
   // const file_name = "ReservationsTable";
   // logger.info({
@@ -21,13 +28,13 @@ function ReservationsTable({ reservations }) {
     { label: "Reservation Time", accessor: "reservation_time" },
     { label: "People", accessor: "people" },
     { label: "Status", accessor: "status" },
-    { label: "Edit", accessor: "edit" },
     { label: "Seat", accessor: "seat" },
-    { label: "Cancel Reservation", accessor: "cancel_reservation" },
+    { label: "Edit", accessor: "edit" },
+    { label: "Cancel", accessor: "cancel_reservation" },
   ];
 
   return (
-    <table className="table">
+    <table className="table table-striped">
       <ReservationsHead columns={columns} />
       <ReservationsBody columns={columns} reservations={reservations} />
     </table>

@@ -13,18 +13,12 @@ const corsGet = cors({ method: "GET" });
 const corsPost = cors({ method: "POST" });
 const corsPut = cors({ method: "PUT" });
 
-//Need to double up the router methods because frontend and backend use different routes for their tests.
+//Need to double up the routes' methods because frontend and backend use different routes for their tests or at least the instructions for how to go about routing requests, as this is an assignment I do not wish to alter the tests or  go against the instructions.
 
 router
   .route("/new")
   .post(corsPost, controller.create)
   .options(corsPost)
-  .all(methodNotAllowed);
-
-router
-  .route("/mobile_number?")
-  .get(corsGet, controller.search)
-  .options(corsGet)
   .all(methodNotAllowed);
 
 router.use(

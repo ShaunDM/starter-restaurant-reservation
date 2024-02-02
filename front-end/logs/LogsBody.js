@@ -1,3 +1,12 @@
+/**
+ * Defines the body of the logs table.
+ * @param logs
+ *  an array of logs the developer wants to view.
+ * @param columns
+ *  the labels and accessors for the columns of the logs table.
+ * @returns {JSX.Element}
+ */
+
 function LogsBody({ logs, columns }) {
   let tableRows = "";
   if (logs.length) {

@@ -4,6 +4,11 @@ import { createTable } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
 // import logger from "../utils/logger";
 
+/**
+ * Defines the page for a user to create a table.
+ * @returns {JSX.Element}
+ */
+
 function CreateTable() {
   // const file_name = "SeatTable";
   // logger.info({

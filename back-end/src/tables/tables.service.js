@@ -1,3 +1,8 @@
+/**
+ * Defines the service functions for tables and tables_reservations resources.
+ * Also controls reservations resources.
+ */
+
 const knex = require("../db/connection");
 
 async function list() {
@@ -56,6 +61,20 @@ async function updateReservations(reservation) {
     .update(reservation);
 }
 
+async function tableReservationExists(id) {
+  return knex("tables_reservations")
+    .where({ table_id: id })
+    .first()
+    .select("tables_reservations.reservation_id");
+}
+
+async function updateTables(table, reservation_id) {
+  return knex("tables")
+    .where({ table_id: table.table_id })
+    .first()
+    .update({ ...table, reservation_id });
+}
+
 module.exports = {
   list,
   create,
@@ -66,4 +85,6 @@ module.exports = {
   update,
   destroy,
   updateReservations,
+  tableReservationExists,
+  updateTables,
 };

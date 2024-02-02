@@ -1,7 +1,7 @@
 import pino from "pino";
 require("dotenv").config();
 
-const LOG_LEVEL = process.env.LOG_LEVEL || "info";
+const LOG_LEVEL = process.env.REACT_APP_LOG_LEVEL || "info";
 
 async function fetchJson(url, options, onCancel) {
   try {
@@ -32,7 +32,6 @@ const headers = new Headers();
 headers.append("Content-Type", "application/json");
 
 const send = async function (level, logEvent, a, b) {
-  console.log(LOG_LEVEL);
   const url = `${API_BASE_URL}/logging`;
   await fetchJson(url, {
     method: "POST",

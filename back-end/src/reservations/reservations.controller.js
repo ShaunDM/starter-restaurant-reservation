@@ -1,8 +1,13 @@
 /**
- * List handler for reservation resources
+ * Defines the controller for reservation resources.
  */
+
 const service = require("./reservations.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
+
+/**
+ * Checks req.query for a date or mobile_number query.
+ */
 
 function hasQuery(req, res, next) {
   const methodName = "hasQuery";
@@ -87,11 +92,13 @@ function hasValidDate(req, res, next) {
   req.log.debug({ __filename, methodName, body: req.body });
   const { reservation_date, reservation_time } = req.body.data;
   const date = new Date(reservation_date.concat(", ", reservation_time));
+  //checks if reservation_date is a date
   if (Number.isNaN(Date.parse(date))) {
     const message = "reservation_date is not a date.";
     next({ status: 400, message: message });
     req.log.trace({ __filename, methodName, valid: false }, message);
   }
+  //checks if reservation_date is on a Tuesday
   if (date.getDay() == 2) {
     const message =
       "The restaurant is closed on Tuesdays, invalid reservation day.";
@@ -101,6 +108,7 @@ function hasValidDate(req, res, next) {
     });
     req.log.trace({ __filename, methodName, valid: false }, message);
   }
+  //checks if reservation_date and reservation_time is in the future.
   if (Date.now() > Date.parse(date)) {
     const message = "Reservation must be made in the future.";
     next({ status: 400, message: message });
@@ -114,6 +122,7 @@ function hasValidTime(req, res, next) {
   const methodName = "hasValidTime";
   req.log.debug({ __filename, methodName, body: req.body });
   const { reservation_time } = req.body.data;
+  //converts time into an array of numbers, checks if each element in the array is actually a number.
   const getHrsMin = reservation_time.split(":");
   const isNumber = getHrsMin.every((number) =>
     Number.isInteger(parseInt(number))
@@ -165,20 +174,25 @@ function hasValidPeople(req, res, next) {
   req.log.trace({ __filename, methodName, valid: true });
 }
 
+/**
+ * Checks req.body.data if a given key:value pair exists.
+ * @param property
+ * key to check for in req.body.data
+ */
+
 function hasProperty(property, req, res, next) {
   const methodName = `hasProperty('${property}')`;
   req.log.debug({ __filename, methodName, body: req.body });
   const { data } = req.body;
   if (!data[property]) {
     const message = `Reservation must include a ${property} property.`;
-    next({
+    req.log.trace({ __filename, methodName, valid: false }, message);
+    return next({
       status: 400,
       message: message,
     });
-    req.log.trace({ __filename, methodName, valid: false }, message);
-  } else {
-    req.log.trace({ __filename, methodName, valid: true });
   }
+  req.log.trace({ __filename, methodName, valid: true });
 }
 
 //Checks the request to make sure it has all the valid properties needed for a post request.
@@ -274,14 +288,14 @@ async function update(req, res) {
     data: updatedReservation[0],
   });
 }
+
 async function updateStatus(req, res) {
-  const methodName = "update";
+  const methodName = "updateStatus";
   req.log.debug({ __filename, methodName, body: req.body });
   const reservationUpdate = {
     ...res.locals.reservation,
     status: req.body.data.status,
   };
-
   const updatedReservation = await service.update(reservationUpdate);
   res.status(200).json({ data: updatedReservation[0] });
   req.log.trace({
@@ -289,21 +303,6 @@ async function updateStatus(req, res) {
     methodName,
     return: true,
     data: updatedReservation[0],
-  });
-}
-
-//Search list
-
-async function search(req, res) {
-  const methodName = "search";
-  req.log.debug({ __filename, methodName, query: req.query });
-  const data = await service.search(req.query.mobile_number);
-  res.status(200).json({ data: data });
-  req.log.trace({
-    __filename,
-    methodName,
-    return: true,
-    data: data,
   });
 }
 
@@ -332,6 +331,5 @@ module.exports = {
     hasValidStatus,
     asyncErrorBoundary(updateStatus),
   ],
-  search,
   reservationExists,
 };

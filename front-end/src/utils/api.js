@@ -81,12 +81,12 @@ export async function createReservation(reservation, signal) {
 
 export async function listTables(signal) {
   const url = new URL(`${API_BASE_URL}/tables`);
-  const options = {
-    method: "GET",
-    headers,
-    signal,
-  };
-  return await fetchJson(url, options, []);
+  // const options = {
+  //   method: "GET",
+  //   headers,
+  //   signal,
+  // };
+  return await fetchJson(url, { headers, signal });
 }
 
 export async function createTable(table, signal) {
@@ -159,17 +159,22 @@ export async function updateReservation(updatedReservation, signal) {
   return await fetchJson(url, options);
 }
 
-export async function listLogs(signal) {
-  const url = new URL(`${API_BASE_URL}/logging`);
+export async function listLogs(logLevel, signal) {
+  console.log("logLevel", logLevel);
+  let url = `${API_BASE_URL}/logging`;
+  if (logLevel) {
+    url = `${API_BASE_URL}/logging?level=${logLevel}`;
+  }
   const options = {
     method: "GET",
     headers,
     signal,
   };
+  console.log(url);
   return await fetchJson(url, options);
 }
 
-export async function truncate(signal) {
+export async function truncateLogs(signal) {
   const url = `${API_BASE_URL}/logging`;
   const options = {
     method: "DELETE",

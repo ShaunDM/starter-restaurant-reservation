@@ -7,6 +7,11 @@ import ErrorAlert from "../layout/ErrorAlert";
 import { listTables, seatTable, readReservation } from "../utils/api";
 // import logger from "../utils/logger";
 
+/**
+ * Defines the page for the user to seat a reservation to a table.
+ * @returns {JSX.Element}
+ */
+
 function SeatTable() {
   // const file_name = "SeatTable";
   // logger.info({

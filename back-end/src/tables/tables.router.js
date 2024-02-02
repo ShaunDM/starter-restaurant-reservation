@@ -21,7 +21,7 @@ router
   .options(corsDel)
   .all(methodNotAllowed);
 
-//Need to double up the routes' methods because frontend and backend use different routes for their tests, as this is an assignment I do not wish to alter the tests.
+//Need to double up the routes' methods because frontend and backend use different routes for their tests or at least the instructions for how to go about routing requests, as this is an assignment I do not wish to alter the tests or  go against the instructions.
 
 router
   .route("/new")

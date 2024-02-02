@@ -2,7 +2,7 @@ import React from "react";
 import { Link, useLocation } from "react-router-dom";
 import { previous, next } from "../utils/date-time";
 
-function Nav({ date }) {
+function Nav({ date, reservationsFound }) {
   const search = useLocation().search;
   let currentDay = new URLSearchParams(search).get("date");
   if (!currentDay) {
@@ -11,26 +11,39 @@ function Nav({ date }) {
   const nextDay = next(currentDay);
   const previousDay = previous(currentDay);
   return (
-    <nav>
-      <h1>Dashboard</h1>
-      <h4 className="mb-0">{`Reservations for date: ${currentDay}`}</h4>
-
-      <button className="nav-item btn">
-        <Link className="nav-link" to={`/dashboard?date=${previousDay}`}>
-          Previous Day
-        </Link>
-      </button>
-      <button className="nav-item btn">
-        <Link className="nav-link" to={`/dashboard`}>
-          Today
-        </Link>
-      </button>
-      <button className="nav-item btn">
-        <Link className="nav-link" to={`/dashboard?date=${nextDay}`}>
-          Next Day
-        </Link>
-      </button>
-    </nav>
+    <section className="row mb-1">
+      <div className="col">
+        <div className="row bg-dark p-0">
+          <h1 className="col-6 text-light">Dashboard</h1>
+          <div className="col-md-2">
+            <Link
+              className="nav-link text-light"
+              to={`/dashboard?date=${previousDay}`}
+            >
+              <span className="oi oi-caret-left" />
+              &nbsp; Previous Day
+            </Link>
+          </div>
+          <div className="col-md-2">
+            <Link className="nav-link text-light" to={`/dashboard`}>
+              Today
+            </Link>
+          </div>
+          <div className="col-md-2">
+            <Link
+              className="nav-link text-light"
+              to={`/dashboard?date=${nextDay}`}
+            >
+              Next Day &nbsp;
+              <span className="oi oi-caret-right" />
+            </Link>
+          </div>
+        </div>
+        <h5 className="row mx-0 my-1 m-md-1">{`Reservations for date: ${currentDay}`}</h5>
+        <h5 className="row mx-0 my-1 m-md-1">{reservationsFound}</h5>
+      </div>
+      <div className="row"></div>
+    </section>
   );
 }
 

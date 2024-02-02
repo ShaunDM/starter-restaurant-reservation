@@ -1,142 +1,33 @@
-import React, { useState, useEffect, useRef } from "react";
-import { useHistory, useParams } from "react-router-dom";
-import {
-  createReservation,
-  readReservation,
-  updateReservation,
-} from "../utils/api";
-import ErrorAlert from "../layout/ErrorAlert";
+import React from "react";
 // import logger from "../utils/logger";
 
-function ReservationForm() {
+/**
+ * Defines the form to create or edit a reservation.
+ * @param reservation
+ *  the reservation for which the user wants to edit or create.
+ * @param cancelHandler
+ *  the function that is triggered should a user press the cancel button.
+ * @param changeHandler
+ *  the function that is triggered should a user enter data into the form.
+ * @param submitHandler
+ *  the function that is triggered should a user submit the form.
+ *  @returns {JSX.Element}
+ */
+
+function ReservationForm({
+  reservation,
+  cancelHandler,
+  changeHandler,
+  submitHandler,
+}) {
   // const file_name = "ReservationForm";
   // logger.info({
   //   file_name,
   //   method_name: file_name,
   //   message: `started ${file_name}`,
   // });
-
-  const history = useHistory();
-  const mountedRef = useRef(true);
-
-  const { reservation_id } = useParams();
-  const [error, setError] = useState(null);
-  const [reservation, setReservation] = useState({
-    first_name: "",
-    last_name: "",
-    mobile_number: "",
-    reservation_date: "",
-    reservation_time: "",
-    people: 2,
-  });
-
-  useEffect(loadReservation, [reservation_id]);
-
-  function loadReservation() {
-    // const method_name = "loadReservation";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    // });
-
-    if (reservation_id) {
-      const abortController = new AbortController();
-      setError(null);
-      readReservation(reservation_id, abortController.signal)
-        .then((response) => {
-          // logger.trace({
-          //   file_name,
-          //   method_name: `${method_name}/readReservation`,
-          //   message: `valid`,
-          //   params: `Response: ${response}`,
-          // });
-          if (!mountedRef.current) return null;
-          setReservation(response);
-        })
-        .catch((err) => {
-          if (!mountedRef.current) return null;
-          setError(err);
-        });
-      return () => abortController.abort();
-    }
-  }
-
-  function cancelHandler() {
-    // const method_name = "cancelHandler";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `reservation_id: ${reservation_id}`,
-    // });
-    if (reservation_id) {
-      console.log("cancelHandler, Reservation form", reservation_id);
-      history.go(-1);
-    } else {
-      history.push("/");
-    }
-  }
-
-  function changeHandler({ target, target: { name, value } }) {
-    // const method_name = "changeHandler";
-    // logger.trace({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `target: ${target}`,
-    // });
-    if (name === "people") {
-      setReservation({ ...reservation, people: parseInt(value) });
-    } else {
-      setReservation((previousReservation) => ({
-        ...previousReservation,
-        [name]: value,
-      }));
-    }
-  }
-
-  function submitHandler(event) {
-    // const method_name = "submitHandler";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `reservation: ${reservation}`,
-    // });
-    event.preventDefault();
-    if (!reservation_id) {
-      createReservation(reservation)
-        .then((response) => {
-          // logger.trace({
-          //   file_name,
-          //   method_name: `${method_name}/createReservation`,
-          //   message: `valid`,
-          //   params: `Response: ${response}`,
-          // });
-          history.push(`/dashboard?date=${reservation.reservation_date}`);
-        })
-        .catch(setError);
-    } else {
-      const abortController = new AbortController();
-      updateReservation(reservation)
-        .then((response) => {
-          // logger.trace({
-          //   file_name,
-          //   method_name: `${method_name}/updateReservation`,
-          //   message: `valid`,
-          //   params: `Response: ${response}`,
-          // });
-          history.push(`/dashboard?date=${reservation.reservation_date}`);
-        })
-        .catch(setError);
-      return () => abortController.abort();
-    }
-  }
-
   return (
     <form onSubmit={submitHandler} className="mb-4">
-      <ErrorAlert error={error} />
       <div className="row mb-3">
         <div className="col-6 form-group">
           <label className="form-label" htmlFor="first_name">

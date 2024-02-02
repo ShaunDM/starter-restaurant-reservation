@@ -1,17 +1,17 @@
 import React, { useEffect, useState } from "react";
 import { useLocation, useHistory } from "react-router-dom";
-import { listReservations, listTables, finishTable } from "../utils/api";
-import ReservationsTable from "../reservation/ReservationsTable/ReservationsTable";
+import { listReservations, listTables, finishTable } from "../src/utils/api";
+import ReservationsTable from "../src/reservation/ReservationsTable/ReservationsTable";
 import Nav from "./Nav";
-import ErrorAlert from "../layout/ErrorAlert";
-import logger from "../utils/logger";
+import ErrorAlert from "../src/layout/ErrorAlert";
+import logger from "../src/utils/logger";
 
 // import DashboardClean from "./DashboardClean";
 
-/*For some reason test -04: seat button has href with /reservations/${reservation_id}/seat, has a timeout error when using DashboardClean. As such this Dashboard has to be used as I don't want to alter tests for an assignment.*/
+/*For some reason test -04: seat button has href with /reservations/${reservation_id}/seat, has a timeout error when using DashboardClean. As such this Dashboard has to be used as I don't want to alter tests for an assignment. Since the tests started failing I also didn't try to do the same thing with the tables table.*/
 
 /**
- * Defines the dashboard page.
+ * Defines the dashboard page that uses other components to render different parts, caused errors in the tests so it is sidelined.
  * @param date
  *  the date for which the user wants to view reservations.
  * @returns {JSX.Element}

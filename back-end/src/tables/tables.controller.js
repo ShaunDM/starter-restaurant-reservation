@@ -1,7 +1,12 @@
+/**
+ * Defines the controller for tables and tables_reservations resources.
+ *Also controls reservations resources.
+ */
+
 const service = require("./tables.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
-//List
+//list
 
 async function list(req, res) {
   const methodName = "list";
@@ -13,7 +18,13 @@ async function list(req, res) {
   req.log.trace({ __filename, methodName, return: true, data: data });
 }
 
-//Create
+//create
+
+/**
+ * Checks req.body.data if a given key:value pair exists.
+ * @param property
+ * key to check for in req.body.data
+ */
 
 function hasProperty(property, req, res, next) {
   const methodName = `hasProperty('${property}')`;
@@ -31,20 +42,37 @@ function hasProperty(property, req, res, next) {
   }
 }
 
-//Checks the request to make sure it has all the valid properties needed for a post request.
+/**
+ * Generic hasValidProperties function.
+ * Checks for valid properties in requests.
+ * Checks for req.body.data and passes an array to hasProperty to test for a list of key:value pairs that should exist.
+ * @param properties
+ * array of keys to check for in req.body.data
+ */
 
-function hasValidPropertiesPost(req, res, next) {
-  const methodName = "hasValidPropertiesPost";
+function hasValidProperties(properties, req, res, next) {
+  const methodName = "hasValidProperties";
   req.log.debug({ __filename, methodName, body: req.body });
   if (!req.body.data) {
     const message = "body must have a data property";
     next({ status: 400, message: message });
     req.log.trace({ __filename, methodName, valid: false }, message);
   }
-  const needsProperties = ["table_name", "capacity"];
-  needsProperties.forEach((property) => {
+  properties.forEach((property) => {
     hasProperty(property, req, res, next);
   });
+  req.log.trace({ __filename, methodName, valid: true });
+}
+
+/**
+ * Passes an array of needed properties to hasValidProperties to check for in post requests.
+ */
+
+function hasValidPropertiesPost(req, res, next) {
+  const methodName = "hasValidPropertiesPost";
+  req.log.debug({ __filename, methodName, body: req.body });
+  const needsProperties = ["table_name", "capacity"];
+  hasValidProperties(needsProperties, req, res, next);
   next();
   req.log.trace({ __filename, methodName, valid: true });
 }
@@ -83,6 +111,10 @@ function hasValidCapacity(req, res, next) {
   req.log.trace({ __filename, methodName, valid: true });
 }
 
+/**
+ * .
+ */
+
 async function create(req, res) {
   const methodName = "create";
   req.log.debug({ __filename, methodName, body: req.body });
@@ -96,20 +128,17 @@ async function create(req, res) {
   req.log.trace({ __filename, methodName, return: true, data: newTable });
 }
 
-//Update
+//update
+
+/**
+ * Passes an array of needed properties to hasValidProperties to check for in put requests.
+ */
 
 function hasValidPropertiesPut(req, res, next) {
   const methodName = "hasValidPropertiesPut";
   req.log.debug({ __filename, methodName, body: req.body });
-  if (!req.body.data) {
-    const message = "body must have a data property";
-    next({ status: 400, message: message });
-    req.log.trace({ __filename, methodName, valid: false }, message);
-  }
   const needsProperties = ["reservation_id"];
-  needsProperties.forEach((property) => {
-    hasProperty(property, req, res, next);
-  });
+  hasValidProperties(needsProperties, req, res, next);
   next();
   req.log.trace({ __filename, methodName, valid: true });
 }
@@ -151,7 +180,7 @@ async function tableHasCapacity(req, res, next) {
   req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
   const { capacity } = res.locals.table;
 
-  //Need to include the following if statement to pass thinkful tests and maintain Group-by-resource organization otherwise. Thinkful tests do not include multiple params and I don't know how to keep controller and service files inclusive to their table without merging params from another router.
+  //Need to include the following if statement to pass thinkful tests and maintain Group-by-resource organization otherwise. Thinkful tests do not include URLs with multiple params and I don't know how to keep controller and service files inclusive to their table without merging params from another router.
 
   if (!res.locals.reservation) {
     await reservationExists(req, res, next);
@@ -172,7 +201,15 @@ async function tableHasCapacity(req, res, next) {
 async function reservationExists(req, res, next) {
   const methodName = "reservationExists";
   req.log.debug({ __filename, methodName, body: req.body });
-  const { reservation_id } = req.body.data;
+  let reservation_id = "";
+
+  //Since this function tests for a reservation for multiple types of requests, some of which don't include it in the req body and some do, while none put it in the route parameters, the if statements assign it to res.locals based on the type of request rather than making a new function for each.
+
+  if (!req.body.data) {
+    reservation_id = res.locals.table.reservation_id;
+  } else {
+    reservation_id = req.body.data.reservation_id;
+  }
   const foundReservation = await service.readReservation(reservation_id);
   if (!foundReservation) {
     const message = `reservation_id: ${reservation_id} not found`;
@@ -214,6 +251,10 @@ async function update(req, res, next) {
     status: "seated",
   };
   await updateReservations(req, res, next);
+  await service.updateTables(
+    res.locals.table,
+    res.locals.reservation.reservation_id
+  );
   res.status(200).json({
     data: await service.update(reservationUpdate),
   });
@@ -225,55 +266,11 @@ async function update(req, res, next) {
   });
 }
 
-/*Delete
+/*reservations update
 
-Instructions state that they want to delete the data table's row when guests are finished with their meal to "free" their table despite wanting to see the newly freed table as available after deletion and the hints for tests -04 stating: 
+  I don't know how to keep group by resource without merge params and my controller for reservations often requires the reservation_id in the params, rather than messing with my reservations controller, I copy and pasted the relevant functions and fit them to requests to tables below.
 
-*Hint Seed the tables table in a similar way as it's done with the reservations table.
-*Hint Add a reservation_id column in the tables table. Use the .references() and inTable() knex functions to add the foreign key reference.
-
-to keep track of whether a table is occupied. So, instead of a simple put request to the relevant row; I will be deleting and reposting the row for the joined table I created to maintain a consistent table_id*/
-
-async function isOccupied(req, res, next) {
-  const methodName = "isOccupied";
-  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
-  const isSeated = await service.readAvailable(res.locals.table.table_id);
-  if (!res.locals.reservation) {
-    await reservationExists(req, res, next);
-  }
-  if (!isSeated.reservation_id) {
-    const message = `table_id: ${isSeated.table_id} is not occupied`;
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    return next({
-      status: 400,
-      message: message,
-    });
-  }
-  next();
-  req.log.trace({ __filename, methodName, valid: true });
-}
-
-async function destroy(req, res, next) {
-  const methodName = "update";
-  req.log.debug({ __filename, methodName, locals: res.locals });
-  const { table_id } = res.locals.table;
-  await service.destroy(table_id);
-  await service.insertTableToTableReservations(table_id);
-  res.locals.reservationStatusUpdate = {
-    ...res.locals.reservation,
-    status: "finished",
-  };
-  await updateReservations(req, res, next);
-  res.status(200).json({ data: res.locals.table });
-  req.log.trace({
-    __filename,
-    methodName,
-    return: true,
-    data: res.locals.table,
-  });
-}
-
-//reservations update
+  */
 
 function reservationStatusIsNotFinished(req, res, next) {
   const methodName = "reservationStatusIsNotFinished";
@@ -330,6 +327,47 @@ async function updateReservations(req, res, next) {
     methodName,
     return: true,
     data: updatedReservation[0],
+  });
+}
+
+//destroy
+
+async function isOccupied(req, res, next) {
+  const methodName = "isOccupied";
+  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  const isSeated = await service.readAvailable(res.locals.table.table_id);
+  if (!isSeated.reservation_id) {
+    const message = `table_id: ${isSeated.table_id} is not occupied`;
+    req.log.trace({ __filename, methodName, valid: false }, message);
+    return next({
+      status: 400,
+      message: message,
+    });
+  }
+  if (!res.locals.reservation) {
+    await reservationExists(req, res, next);
+  }
+  next();
+  req.log.trace({ __filename, methodName, valid: true });
+}
+
+async function destroy(req, res, next) {
+  const methodName = "update";
+  req.log.debug({ __filename, methodName, locals: res.locals });
+  const { table_id } = res.locals.table;
+  await service.destroy(table_id);
+  await service.insertTableToTableReservations(table_id);
+  res.locals.reservationStatusUpdate = {
+    ...res.locals.reservation,
+    status: "finished",
+  };
+  await updateReservations(req, res, next);
+  res.status(200).json({ data: res.locals.table });
+  req.log.trace({
+    __filename,
+    methodName,
+    return: true,
+    data: res.locals.table,
   });
 }
 

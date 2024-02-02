@@ -1,15 +1,17 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { changeReservationStatus, readReservation } from "../../utils/api";
-// import logger from "../../utils/logger";
 import ErrorAlert from "../../layout/ErrorAlert";
+// import logger from "../../utils/logger";
 
-//Was going to adjust if table could be seated through today's date, but caused tests to fail.
-// let today = new Date();
-// const dd = String(today.getDate()).padStart(2, "0");
-// const mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-// const yyyy = today.getFullYear();
-// today = yyyy + "-" + mm + "-" + dd;
+/**
+ * Defines the body of the reservation's table.
+ * @param reservations
+ *  an array of reservations for which the user wants to view.
+ *  @param columns
+ *  the labels and accessors for the columns of the reservations table.
+ * @returns {JSX.Element}
+ */
 
 function ReservationsBody({ reservations, columns }) {
   // const file_name = "ReservationsBody";
@@ -19,6 +21,14 @@ function ReservationsBody({ reservations, columns }) {
   //   message: `started ${file_name}`,
   //   params: `reservations: ${reservations}, columns: ${columns}`,
   // });
+
+  //Was going to adjust so that the reservation could only be seated if it was for today's date, but caused tests to fail.
+
+  // let today = new Date();
+  // const dd = String(today.getDate()).padStart(2, "0");
+  // const mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
+  // const yyyy = today.getFullYear();
+  // today = yyyy + "-" + mm + "-" + dd;
 
   const [error, setError] = useState(null);
   const history = useHistory();
@@ -62,7 +72,7 @@ function ReservationsBody({ reservations, columns }) {
         <td key="seat" data-reservation-id-status={reservation.reservation_id}>
           <Link
             to={`/reservations/${reservation.reservation_id}/seat`}
-            className="btn btn-primary"
+            className="btn btn-dark"
           >
             Seat
           </Link>
@@ -70,7 +80,7 @@ function ReservationsBody({ reservations, columns }) {
       );
       const addNoSeat = (
         <td key="seat" data-reservation-id-status={reservation.reservation_id}>
-          <button className="btn btn-primary" disabled>
+          <button className="btn btn-dark" disabled>
             Seat
           </button>
         </td>
@@ -78,20 +88,20 @@ function ReservationsBody({ reservations, columns }) {
       const addEdit = (
         <Link
           to={`/reservations/${reservation.reservation_id}/edit`}
-          className="btn btn-primary"
+          className="btn btn-info"
         >
           Edit
         </Link>
       );
       const addCancel = (
         <button
-          className="btn btn-primary"
+          className="btn btn-danger"
           type="button"
           onClick={cancelHandler}
           data-reservation-id-cancel={reservation.reservation_id}
           value={reservation.reservation_id}
         >
-          Cancel Reservation
+          Cancel
         </button>
       );
       let tData = "";
