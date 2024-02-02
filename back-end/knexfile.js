@@ -3,18 +3,18 @@ const path = require("path");
 
 const {
   NODE_ENV = "development",
-  PRODUCTION_DATABASE_URL = "postgresql://postgres@localhost/postgres",
-  DEVELOPMENT_DATABASE_URL = "postgresql://postgres@localhost/postgres",
+  DATABASE_URL = "postgresql://postgres@localhost/postgres",
+  DATABASE_URL_DEVELOPMENT = "postgresql://postgres@localhost/postgres",
   DATABASE_URL_TEST = "postgresql://postgres@localhost/postgres",
   DATABASE_URL_PREVIEW = "postgresql://postgres@localhost/postgres",
   DEBUG,
 } = process.env;
 
-let URL = DEVELOPMENT_DATABASE_URL;
+let URL = DATABASE_URL_DEVELOPMENT;
 
 switch (NODE_ENV) {
   case "production": {
-    URL = PRODUCTION_DATABASE_URL;
+    URL = DATABASE_URL;
     break;
   }
   case "test": {
