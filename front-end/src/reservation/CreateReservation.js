@@ -84,7 +84,9 @@ function CreateReservation() {
 
   return (
     <main>
-      <h1 className="mb-3">Create Reservation</h1>
+      <nav className="row bg-dark p-0">
+        <h1 className="mb-3 ml-3 text-light">Create Reservation</h1>
+      </nav>
       <ErrorAlert error={error} />
       <ReservationForm
         reservation={reservation}

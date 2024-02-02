@@ -79,11 +79,13 @@ function CreateTable() {
 
   return (
     <main>
-      <h1 className="mb-3">Create Table</h1>
+      <nav className="row bg-dark p-0 ">
+        <h1 className="mb-3 ml-3 text-light">Create Table</h1>
+      </nav>
       <ErrorAlert error={error} />
       <form onSubmit={submitHandler} className="mb-4">
-        <div className="row mb-3">
-          <div className="col-6 form-group">
+        <div className="row my-3 font-weight-bold">
+          <div className="col-md-6 form-group">
             <label className="form-label" htmlFor="table_name">
               Table Name
             </label>
@@ -92,13 +94,14 @@ function CreateTable() {
               id="table_name"
               name="table_name"
               type="text"
+              placeholder="Must be at least 2 characters"
               // minlength="2"
               value={table.table_name}
               onChange={changeHandler}
               required={true}
             />
           </div>
-          <div className="col-6 form-group">
+          <div className="col-md-6 form-group">
             <label className="form-label" htmlFor="capacity">
               Capacity
             </label>
@@ -107,6 +110,7 @@ function CreateTable() {
               id="capacity"
               name="capacity"
               type="number"
+              placeholder="Must at least seat 1"
               // min="1"
               value={table.capacity}
               onChange={changeHandler}

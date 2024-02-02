@@ -28,8 +28,8 @@ function ReservationForm({
   // });
   return (
     <form onSubmit={submitHandler} className="mb-4">
-      <div className="row mb-3">
-        <div className="col-6 form-group">
+      <div className="row my-3 font-weight-bold">
+        <div className="col-6 form-group ">
           <label className="form-label" htmlFor="first_name">
             First Name
           </label>
@@ -44,7 +44,7 @@ function ReservationForm({
           />
         </div>
         <div className="col-6 form-group">
-          <label className="form-label" htmlFor="last_name">
+          <label className="form-label " htmlFor="last_name">
             Last Name
           </label>
           <input

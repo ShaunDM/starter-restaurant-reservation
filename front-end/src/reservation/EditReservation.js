@@ -109,7 +109,9 @@ function EditReservation() {
 
   return (
     <main>
-      <h1 className="mb-3">Edit Reservation</h1>
+      <nav className="row bg-dark p-0">
+        <h1 className="mb-3 ml-3 text-light">Edit Reservation</h1>
+      </nav>
       <ErrorAlert error={error} />
       <ReservationForm
         reservation={reservation}

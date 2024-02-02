@@ -3,6 +3,7 @@ import {
   useHistory,
   useParams,
 } from "react-router-dom/cjs/react-router-dom.min";
+import TablesTable from "./tablesTable/TablesTable";
 import ErrorAlert from "../layout/ErrorAlert";
 import { listTables, seatTable, readReservation } from "../utils/api";
 // import logger from "../utils/logger";
@@ -114,14 +115,6 @@ function SeatTable() {
       .catch(setSubmitError);
   }
 
-  const tableRows = tables.map((table) => (
-    <tr key={table.table_id}>
-      <th scope="row">{table.table_id}</th>
-      <td>{table.table_name}</td>
-      <td>{table.capacity}</td>
-      <td>{table.available}</td>
-    </tr>
-  ));
   const list = tables.map((table) => (
     <option key={table.table_id} value={table.table_id}>
       {`${table.table_name} - ${table.capacity}`}
@@ -135,17 +128,7 @@ function SeatTable() {
       <ErrorAlert error={tablesError} />
       <ErrorAlert error={submitError} />
       <section>
-        <table className="table">
-          <thead>
-            <tr>
-              <th scope="col">Table ID</th>
-              <th scope="col">Table Name</th>
-              <th scope="col">Capacity</th>
-              <th scope="col">Availability</th>
-            </tr>
-          </thead>
-          <tbody>{tableRows}</tbody>
-        </table>
+        <TablesTable tables={tables} />
       </section>
       <section>
         <form onSubmit={submitHandler} className="mb-4">

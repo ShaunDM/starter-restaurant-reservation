@@ -86,23 +86,29 @@ function ReservationsBody({ reservations, columns }) {
         </td>
       );
       const addEdit = (
-        <Link
-          to={`/reservations/${reservation.reservation_id}/edit`}
-          className="btn btn-info"
-        >
-          Edit
-        </Link>
+        <td key="edit" data-reservation-id-status={reservation.reservation_id}>
+          <Link
+            to={`/reservations/${reservation.reservation_id}/edit`}
+            className="btn btn-info"
+          >
+            Edit
+          </Link>
+        </td>
       );
       const addCancel = (
-        <button
-          className="btn btn-danger"
-          type="button"
-          onClick={cancelHandler}
+        <td
+          key="cancel"
           data-reservation-id-cancel={reservation.reservation_id}
-          value={reservation.reservation_id}
         >
-          Cancel
-        </button>
+          <button
+            className="btn btn-danger"
+            type="button"
+            onClick={cancelHandler}
+            value={reservation.reservation_id}
+          >
+            Cancel
+          </button>
+        </td>
       );
       let tData = "";
       return (
@@ -111,9 +117,9 @@ function ReservationsBody({ reservations, columns }) {
             if (accessor === "seat") {
               return reservation.status === "booked" ? addSeat : addNoSeat;
             } else if (accessor === "edit") {
-              tData = addEdit;
+              return addEdit;
             } else if (accessor === "cancel_reservation") {
-              tData = addCancel;
+              return addCancel;
             } else {
               tData = reservation[accessor] ? reservation[accessor] : "——";
             }

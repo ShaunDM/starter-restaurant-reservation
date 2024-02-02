@@ -8,7 +8,7 @@ import {
   readReservation,
 } from "../utils/api";
 import Nav from "./Nav";
-import ReservationsHead from "../reservation/ReservationsTable/ReservationsHead";
+import ReservationsHead from "../reservation/reservationsTable/ReservationsHead";
 import ErrorAlert from "../layout/ErrorAlert";
 // import logger from "../utils/logger";
 
@@ -123,6 +123,7 @@ function Dashboard({ date }) {
     }
   }
 
+  //can't use ReservationsBody or ReservationsTable file as it causes tests to fail
   const reservationRows = reservations.map((reservation) => {
     if (reservation.status === "seated") {
       return (
@@ -187,7 +188,7 @@ function Dashboard({ date }) {
             Edit
           </Link>
         </td>
-        <td data-reservation-id-cancel={reservation.reservation_id}>
+        <td>
           <button
             className="btn btn-danger"
             type="button"
@@ -231,6 +232,7 @@ function Dashboard({ date }) {
         <td>{table.table_name}</td>
         <td>{table.capacity}</td>
         <td data-table-id-status={table.table_id}>free</td>
+        <td></td>
       </tr>
     );
   });
@@ -257,6 +259,7 @@ function Dashboard({ date }) {
               <th scope="col">Table Name</th>
               <th scope="col">Capacity</th>
               <th scope="col">Availability</th>
+              <th scope="col">Finish</th>
             </tr>
           </thead>
           <tbody>{tableRows}</tbody>

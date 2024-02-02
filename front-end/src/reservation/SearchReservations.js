@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { searchReservations } from "../utils/api";
-import ReservationsTable from "./ReservationsTable/ReservationsTable";
+import ReservationsTable from "./reservationsTable/ReservationsTable";
 import ErrorAlert from "../layout/ErrorAlert";
 // import logger from "../utils/logger";
 
@@ -75,16 +75,20 @@ function SearchReservations() {
     setLoad(query);
   }
 
-  let reservationFound = !reservations.length
+  const reservationFound = !reservations.length
     ? "No reservations found"
     : `Reservations found: ${reservations.length}`;
+
+  const searched = load ? load : "";
 
   return (
     <main>
       <nav>
-        <h1>Search</h1>
+        <div className="row bg-dark p-0">
+          <h1 className="text-light ml-3">Search</h1>
+        </div>
         <div className="d-md-flex mb-3">
-          <h4 className="mb-0">{`Reservations for number: ${load}`}</h4>
+          <h4 className="mb-0">{`Reservations for number: ${searched}`}</h4>
         </div>
         <form onSubmit={submitHandler} className="mb-4">
           <div className="row mb-3">
