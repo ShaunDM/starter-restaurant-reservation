@@ -2,18 +2,39 @@ require("dotenv").config();
 const path = require("path");
 
 const {
-  DATABASE_URL = "postgresql://postgres@localhost/postgres",
-  DATABASE_URL_DEVELOPMENT = "postgresql://postgres@localhost/postgres",
+  NODE_ENV = "development",
+  PRODUCTION_DATABASE_URL = "postgresql://postgres@localhost/postgres",
+  DEVELOPMENT_DATABASE_URL = "postgresql://postgres@localhost/postgres",
   DATABASE_URL_TEST = "postgresql://postgres@localhost/postgres",
   DATABASE_URL_PREVIEW = "postgresql://postgres@localhost/postgres",
   DEBUG,
 } = process.env;
 
+let URL = DEVELOPMENT_DATABASE_URL;
+
+switch (NODE_ENV) {
+  case "production": {
+    URL = PRODUCTION_DATABASE_URL;
+    break;
+  }
+  case "test": {
+    URL = DATABASE_URL_TEST;
+    break;
+  }
+  case "preview": {
+    URL = DATABASE_URL_PREVIEW;
+    break;
+  }
+  default: {
+    break;
+  }
+}
+
 module.exports = {
   development: {
     client: "postgresql",
     pool: { min: 1, max: 5 },
-    connection: DATABASE_URL_DEVELOPMENT,
+    connection: URL,
     migrations: {
       directory: path.join(__dirname, "src", "db", "migrations"),
     },
@@ -25,7 +46,7 @@ module.exports = {
   test: {
     client: "postgresql",
     pool: { min: 1, max: 5 },
-    connection: DATABASE_URL_TEST,
+    connection: URL,
     migrations: {
       directory: path.join(__dirname, "src", "db", "migrations"),
     },
@@ -37,7 +58,7 @@ module.exports = {
   preview: {
     client: "postgresql",
     pool: { min: 1, max: 5 },
-    connection: DATABASE_URL_PREVIEW,
+    connection: URL,
     migrations: {
       directory: path.join(__dirname, "src", "db", "migrations"),
     },
@@ -49,7 +70,7 @@ module.exports = {
   production: {
     client: "postgresql",
     pool: { min: 1, max: 5 },
-    connection: DATABASE_URL,
+    connection: URL,
     migrations: {
       directory: path.join(__dirname, "src", "db", "migrations"),
     },
