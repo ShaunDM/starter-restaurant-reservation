@@ -138,6 +138,11 @@ function Dashboard({ date }) {
           <td data-reservation-id-status={reservation.reservation_id}>
             {reservation.status}
           </td>
+          <td>
+            <button disabled className="btn btn-dark">
+              Seat
+            </button>
+          </td>
           <td data-reservation-id-status={reservation.reservation_id}>
             <Link
               to={`/reservations/${reservation.reservation_id}/edit`}

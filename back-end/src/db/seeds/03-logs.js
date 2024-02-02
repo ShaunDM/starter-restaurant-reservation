@@ -1,3 +1,3 @@
 exports.seed = function (knex) {
-  return knex.raw("TRUNCATE TABLE tables RESTART IDENTITY CASCADE");
+  return knex.raw("TRUNCATE TABLE logs RESTART IDENTITY CASCADE");
 };
