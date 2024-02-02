@@ -1,10 +1,10 @@
-import React, { useEffect, useState } from "react";
-import { useLocation, useHistory } from "react-router-dom";
-import { listReservations, listTables, finishTable } from "../src/utils/api";
-import ReservationsTable from "../src/reservation/ReservationsTable/ReservationsTable";
-import Nav from "./Nav";
-import ErrorAlert from "../src/layout/ErrorAlert";
-import logger from "../src/utils/logger";
+// import React, { useEffect, useState } from "react";
+// import { useLocation, useHistory } from "react-router-dom";
+// import { listReservations, listTables, finishTable } from "../front-end/src/utils/api";
+// import ReservationsTable from "../front-end/src/reservation/ReservationsTable/ReservationsTable";
+// import Nav from "./Nav";
+// import ErrorAlert from "../front-end/src/layout/ErrorAlert";
+// import logger from "../front-end/src/utils/logger";
 
 // import DashboardClean from "./DashboardClean";
 

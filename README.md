@@ -4,6 +4,10 @@
 
 An internal table and reservation management system for restaurants.
 
+## Live Site
+
+https://restaurant-reservation-frontend-a62q.onrender.com
+
 ## Instructions
 
 ### Installation
@@ -12,7 +16,6 @@ An internal table and reservation management system for restaurants.
 1. Run `cp ./back-end/.env.sample ./back-end/.env`.
 1. Update the `./back-end/.env` file with the connection URL's to your PostgreSQL database instance.
 1. Run `cp ./front-end/.env.sample ./front-end/.env`.
-1. You should not need to make changes to the `./front-end/.env` file unless you want to connect to a backend at a location other than `http://localhost:5001`.
 1. Run `npm install` to install project dependencies.
 1. Run `npm run start:dev` to start your server in development mode.
 
@@ -103,7 +106,16 @@ You can use the screenshots to debug your code by rendering additional informati
 - Add a calendar to the dashboard that allows people to navigate dates more easily.
 - Add the ability to map tables to a floor plan.
 
-## Imagea of current app
+## Technologies Used
+
+- Backend:
+
+  - Node, Express, Knex, Pino, Jest, cors
+
+- Frontend:
+  - Node, React, Pino, Jest
+
+## Images for current app
 
 #### Dashboard
 
