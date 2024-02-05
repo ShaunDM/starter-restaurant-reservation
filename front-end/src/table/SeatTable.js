@@ -133,7 +133,7 @@ function SeatTable() {
       <section>
         <form onSubmit={submitHandler} className="mb-4">
           <div className="row mb-3">
-            <label className="form-label" htmlFor="cloudCover">
+            <label className="form-label" htmlFor="seat.table_id">
               Select a table to seat reservation
             </label>
             <select

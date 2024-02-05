@@ -89,7 +89,7 @@ function ReservationForm({
         </div>
         <div className="col-6 form-group">
           <label className="form-label" htmlFor="reservation_time">
-            Reservation Date
+            Reservation Time
           </label>
           <input
             className="form-control"
