@@ -74,7 +74,6 @@ You can use the screenshots to debug your code by rendering additional informati
     - People (party size)
     - Status (booked, seated, finished, cancelled)
     - Actions to:
-
       - Seat
       - Edit
       - Cancel Reservation
@@ -114,9 +113,10 @@ You can use the screenshots to debug your code by rendering additional informati
   - Node, Express, Knex, Pino, Jest, cors
 
 - Frontend:
+
   - Node, React, Pino, Jest
 
-## Images for current app
+## Images of current app
 
 #### Dashboard
 
