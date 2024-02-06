@@ -13,7 +13,7 @@ const corsGet = cors({ method: "GET" });
 const corsPost = cors({ method: "POST" });
 const corsPut = cors({ method: "PUT" });
 
-//Need to double up the routes' methods because frontend and backend use different routes for their tests or at least the instructions for how to go about routing requests, as this is an assignment I do not wish to alter the tests or  go against the instructions.
+//Need to double up the routes' methods because frontend and backend use different routes for their tests or at least the instructions for how to go about routing requests differ from the actual tests, as this is an assignment I do not wish to alter the tests or go against the instructions. Alternatively I could delete the "/new" route, but the course taught to be specific in routing for clarity, function, and security reasons; so I kept it as is.
 
 router
   .route("/new")
