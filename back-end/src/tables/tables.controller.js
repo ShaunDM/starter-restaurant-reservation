@@ -268,7 +268,7 @@ async function update(req, res, next) {
 
 /*reservations update
 
-  I don't know how to keep group by resource without merge params and my controller for reservations often requires the reservation_id in the params, rather than messing with my reservations controller, I copy and pasted the relevant functions and fit them to requests to tables below.
+  I don't know how to keep group by resource without merge params and my controller for reservations often requires the reservation_id in the params, rather than messing with my reservations controller and violate group by resource anyway by importing it to this controller, I copy and pasted the relevant functions and fit them to requests to the tables route below.
 
   */
 
