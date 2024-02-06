@@ -20,6 +20,7 @@ import ErrorAlert from "../layout/ErrorAlert";
  *  the date for which the user wants to view reservations.
  * @returns {JSX.Element}
  */
+
 function Dashboard({ date }) {
   // const file_name = "Dashboard";
   // logger.info({
@@ -124,8 +125,62 @@ function Dashboard({ date }) {
   }
 
   //can't use ReservationsBody or ReservationsTable file as it causes tests to fail
-  const reservationRows = reservations.map((reservation) => {
-    if (reservation.status === "seated") {
+  const reservationRows = !reservations.length ? (
+    <tr>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+      <td></td>
+    </tr>
+  ) : (
+    reservations.map((reservation) => {
+      if (reservation.status === "seated") {
+        return (
+          <tr key={reservation.reservation_id}>
+            <td>{reservation.reservation_id}</td>
+            <td>{reservation.first_name}</td>
+            <td>{reservation.last_name}</td>
+            <td>{reservation.mobile_number}</td>
+            <td>{reservation.reservation_date}</td>
+            <td>{reservation.reservation_time}</td>
+            <td>{reservation.people}</td>
+            <td data-reservation-id-status={reservation.reservation_id}>
+              {reservation.status}
+            </td>
+            <td>
+              <button disabled className="btn btn-dark">
+                Seat
+              </button>
+            </td>
+            <td data-reservation-id-status={reservation.reservation_id}>
+              <Link
+                to={`/reservations/${reservation.reservation_id}/edit`}
+                className="btn btn-info"
+              >
+                Edit
+              </Link>
+            </td>
+            <td data-reservation-id-cancel={reservation.reservation_id}>
+              <button
+                className="btn btn-danger"
+                type="button"
+                onClick={cancelHandler}
+                value={reservation.reservation_id}
+              >
+                Cancel
+              </button>
+            </td>
+          </tr>
+        );
+      }
+
       return (
         <tr key={reservation.reservation_id}>
           <td>{reservation.reservation_id}</td>
@@ -138,10 +193,13 @@ function Dashboard({ date }) {
           <td data-reservation-id-status={reservation.reservation_id}>
             {reservation.status}
           </td>
-          <td>
-            <button disabled className="btn btn-dark">
+          <td data-reservation-id-status={reservation.reservation_id}>
+            <Link
+              to={`/reservations/${reservation.reservation_id}/seat`}
+              className="btn btn-dark"
+            >
               Seat
-            </button>
+            </Link>
           </td>
           <td data-reservation-id-status={reservation.reservation_id}>
             <Link
@@ -151,11 +209,12 @@ function Dashboard({ date }) {
               Edit
             </Link>
           </td>
-          <td data-reservation-id-cancel={reservation.reservation_id}>
+          <td>
             <button
               className="btn btn-danger"
               type="button"
               onClick={cancelHandler}
+              data-reservation-id-cancel={reservation.reservation_id}
               value={reservation.reservation_id}
             >
               Cancel
@@ -163,50 +222,8 @@ function Dashboard({ date }) {
           </td>
         </tr>
       );
-    }
-
-    return (
-      <tr key={reservation.reservation_id}>
-        <td>{reservation.reservation_id}</td>
-        <td>{reservation.first_name}</td>
-        <td>{reservation.last_name}</td>
-        <td>{reservation.mobile_number}</td>
-        <td>{reservation.reservation_date}</td>
-        <td>{reservation.reservation_time}</td>
-        <td>{reservation.people}</td>
-        <td data-reservation-id-status={reservation.reservation_id}>
-          {reservation.status}
-        </td>
-        <td data-reservation-id-status={reservation.reservation_id}>
-          <Link
-            to={`/reservations/${reservation.reservation_id}/seat`}
-            className="btn btn-dark"
-          >
-            Seat
-          </Link>
-        </td>
-        <td data-reservation-id-status={reservation.reservation_id}>
-          <Link
-            to={`/reservations/${reservation.reservation_id}/edit`}
-            className="btn btn-info"
-          >
-            Edit
-          </Link>
-        </td>
-        <td>
-          <button
-            className="btn btn-danger"
-            type="button"
-            onClick={cancelHandler}
-            data-reservation-id-cancel={reservation.reservation_id}
-            value={reservation.reservation_id}
-          >
-            Cancel
-          </button>
-        </td>
-      </tr>
-    );
-  });
+    })
+  );
 
   const tableRows = tables.map((table) => {
     if (table.reservation_id) {
@@ -242,8 +259,6 @@ function Dashboard({ date }) {
     );
   });
 
-  // return <DashboardClean date={date} />;
-
   return (
     <main className="container-fluid d-flex flex-column p-0">
       <Nav date={date} reservationsFound={reservationsFound} />
@@ -251,7 +266,7 @@ function Dashboard({ date }) {
       <ErrorAlert error={tablesError} />
       <ErrorAlert error={error} />
       <section className="row">
-        <table className="table table-striped p-0">
+        <table className="table table-striped p-0 col">
           <ReservationsHead />
           <tbody>{reservationRows}</tbody>
         </table>

@@ -14,10 +14,10 @@ function Nav({ date, reservationsFound }) {
     <section className="row mb-1">
       <div className="col">
         <div className="row bg-dark p-0">
-          <h1 className="col-6 text-light">Dashboard</h1>
+          <h1 className="col-4 text-light">Dashboard</h1>
           <div className="col-md-2">
             <Link
-              className="nav-link text-light"
+              className="nav-link text-light text-nowrap text-center text-md-left"
               to={`/dashboard?date=${previousDay}`}
             >
               <span className="oi oi-caret-left" />
@@ -25,13 +25,16 @@ function Nav({ date, reservationsFound }) {
             </Link>
           </div>
           <div className="col-md-2">
-            <Link className="nav-link text-light" to={`/dashboard`}>
+            <Link
+              className="nav-link text-light text-nowrap text-center text-md-center"
+              to={`/dashboard`}
+            >
               Today
             </Link>
           </div>
           <div className="col-md-2">
             <Link
-              className="nav-link text-light"
+              className="nav-link text-light text-center text-nowrap"
               to={`/dashboard?date=${nextDay}`}
             >
               Next Day &nbsp;

@@ -105,6 +105,7 @@ You can use the screenshots to debug your code by rendering additional informati
 
 - Add a calendar to the dashboard that allows people to navigate dates more easily.
 - Add the ability to map tables to a floor plan.
+- Add the ability to delete and edit tables.
 
 ## Technologies Used
 
