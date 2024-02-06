@@ -94,14 +94,14 @@ function SearchReservations() {
           <div className="row mb-3">
             <div className="mx-3 form-group">
               <div>
-                <label className="form-label" htmlFor="query">
+                <label className="form-label" htmlFor="mobile_number">
                   Search
                 </label>
               </div>
               <input
-                id="query"
+                id="mobile_number"
                 className="me-3"
-                name="query"
+                name="mobile_number"
                 type="text"
                 placeholder="Enter a customer's phone number"
                 value={query}
