@@ -68,7 +68,6 @@ function Dashboard({ date }) {
     if (finish.table_id && finish.reservation_id) {
       const abortController = new AbortController();
       setTablesError(null);
-
       if (
         window.confirm(
           "Is this table ready to seat new guests? This cannot be undone."

@@ -65,12 +65,15 @@ function ReservationForm({
             className="form-control"
             id="mobile_number"
             name="mobile_number"
-            type="tel"
+            // pattern="[0-9]-{3}[0-9]{3}-[0-9]{4}"
             placeholder="xxx-xxx-xxxx"
             value={reservation.mobile_number}
             onChange={changeHandler}
             required={true}
           />
+          <small>
+            Phone number must be in format xxxxxxxxxx or xxx-xxx-xxxx
+          </small>
         </div>
         <div className="col-6 form-group">
           <label className="form-label" htmlFor="reservation_date">

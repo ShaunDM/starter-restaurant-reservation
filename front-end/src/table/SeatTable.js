@@ -133,12 +133,12 @@ function SeatTable() {
       <section>
         <form onSubmit={submitHandler} className="mb-4">
           <div className="row mb-3">
-            <label className="form-label" htmlFor="seat.table_id">
+            <label className="form-label" htmlFor="table_id">
               Select a table to seat reservation
             </label>
             <select
               className="form-control"
-              id="table"
+              id="table_id"
               name="table_id"
               value={seat.table_id}
               onChange={changeHandler}

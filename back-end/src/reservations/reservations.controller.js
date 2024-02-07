@@ -174,6 +174,25 @@ function hasValidPeople(req, res, next) {
   req.log.trace({ __filename, methodName, valid: true });
 }
 
+function hasValidMobile(req, res, next) {
+  const methodName = "hasValidMobile";
+  req.log.debug({ __filename, methodName, body: req.body });
+  const { mobile_number } = req.body.data;
+  const phone = mobile_number.replace(/[^a-zA-Z0-9]/g, "");
+  if (!Number.isInteger(parseInt(phone))) {
+    const message = "Mobile Number is not a phone number.";
+    next({ status: 400, message: message });
+    req.log.trace({ __filename, methodName, valid: false }, message);
+  }
+  if (phone.length !== 10) {
+    const message = "Mobile Number is not formatted correctly.";
+    next({ status: 400, message: message });
+    req.log.trace({ __filename, methodName, valid: false }, message);
+  }
+  next();
+  req.log.trace({ __filename, methodName, valid: true });
+}
+
 /**
  * Checks req.body.data if a given key:value pair exists.
  * @param property
@@ -314,6 +333,7 @@ module.exports = {
     hasValidTime,
     hasValidDate,
     hasValidPeople,
+    hasValidMobile,
     hasBookedStatus,
     asyncErrorBoundary(create),
   ],
@@ -323,6 +343,7 @@ module.exports = {
     hasValidTime,
     hasValidDate,
     hasValidPeople,
+    hasValidMobile,
     asyncErrorBoundary(update),
   ],
   updateStatus: [

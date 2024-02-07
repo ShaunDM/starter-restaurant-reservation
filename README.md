@@ -141,3 +141,11 @@ You can use the screenshots to debug your code by rendering additional informati
 #### Create Reservation
 
 ![create table](images/create_table.png)
+
+#### Not Found - App
+
+![not found](images/not_found.png)
+
+#### Not Found - Render
+
+![not found render](images/not_found_render.png)
