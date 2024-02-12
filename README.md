@@ -96,9 +96,9 @@ You can use the screenshots to debug your code by rendering additional informati
 
   - Table utilization:
 
-    - To create a table click New Table on the sidebar.
+    - To create a table, click New Table on the sidebar.
 
-    - To go to a date you can either navigate through the previous day, today, or next day buttons on the dashboard or by entering the date in a query string in the URL through: (home page).com/dashboard?date=yyyy-mm-dd.
+    - To go to a date you can either navigate through the previous day, today, or next day buttons on the dashboard or by entering the date in a query string in the URL through the following format: (domain name).com/dashboard?date=yyyy-mm-dd.
 
 ## Improvements and Future
 
