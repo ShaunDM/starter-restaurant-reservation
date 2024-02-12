@@ -80,11 +80,11 @@ You can use the screenshots to debug your code by rendering additional informati
 
   - Reservation utilization:
 
-    - To create a reservation click New Reservation on the sidebar.
+    - To create a reservation, click New Reservation on the sidebar.
 
-    - To search for a reservation by Mobile Number click Search on the sidebar, partial matches are allowed.
+    - To search for a reservation by Mobile Number, click Search on the sidebar, partial matches are allowed.
 
-    - To edit, seat, or cancel a reservation go to the date of the reservation in the dashboard or Search for it and click the relevant button.
+    - To edit, seat, or cancel a reservation; go to the date of the reservation in the dashboard or Search for it and click the relevant button.
 
   - Each table includes sections for:
 
@@ -103,8 +103,8 @@ You can use the screenshots to debug your code by rendering additional informati
 ## Improvements and Future
 
 - Add a calendar to the dashboard that allows people to navigate dates more easily.
-- Add the ability to map tables to a floor plan.
 - Add the ability to delete and edit tables.
+- Add the ability to map tables to a floor plan.
 
 ## Technologies Used
 
