@@ -1,5 +1,6 @@
 import React from "react";
-// import logger from "../utils/logger";
+import { today } from "../utils/date-time";
+import logger from "../utils/logger";
 
 /**
  * Defines the form to create or edit a reservation.
@@ -20,12 +21,12 @@ function ReservationForm({
   changeHandler,
   submitHandler,
 }) {
-  // const file_name = "ReservationForm";
-  // logger.info({
-  //   file_name,
-  //   method_name: file_name,
-  //   message: `started ${file_name}`,
-  // });
+  const file_name = "ReservationForm";
+  logger.info({
+    file_name,
+    method_name: file_name,
+    message: `started ${file_name}`,
+  });
   return (
     <form onSubmit={submitHandler} className="mb-4">
       <div className="row my-3 font-weight-bold">
@@ -65,15 +66,13 @@ function ReservationForm({
             className="form-control"
             id="mobile_number"
             name="mobile_number"
-            // pattern="[0-9]-{3}[0-9]{3}-[0-9]{4}"
+            pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+            maxLength={12}
             placeholder="xxx-xxx-xxxx"
             value={reservation.mobile_number}
             onChange={changeHandler}
             required={true}
           />
-          <small>
-            Phone number must be in format xxxxxxxxxx or xxx-xxx-xxxx
-          </small>
         </div>
         <div className="col-6 form-group">
           <label className="form-label" htmlFor="reservation_date">
@@ -84,11 +83,14 @@ function ReservationForm({
             id="reservation_date"
             name="reservation_date"
             type="date"
-            // min={today()}
+            placeholder="YYYY-MM-DD"
+            pattern="\d{4}-\d{2}-\d{2}"
+            min={today()}
             value={reservation.reservation_date}
             onChange={changeHandler}
             required={true}
           />
+          {/* <small>Date must be in format YYYY-MM-DD</small> */}
         </div>
         <div className="col-6 form-group">
           <label className="form-label" htmlFor="reservation_time">
@@ -98,9 +100,11 @@ function ReservationForm({
             className="form-control"
             id="reservation_time"
             name="reservation_time"
+            placeholder="HH:MM, military time"
+            pattern="[0-9]{2}:[0-9]{2}"
             type="time"
-            // min="10:30"
-            // max="21:30"
+            min="10:30"
+            max="21:30"
             value={reservation.reservation_time}
             onChange={changeHandler}
             required={true}
@@ -118,7 +122,7 @@ function ReservationForm({
             id="people"
             name="people"
             type="number"
-            // min="1"
+            min="1"
             value={reservation.people}
             onChange={changeHandler}
             required={true}

@@ -1,5 +1,5 @@
 import React from "react";
-// import logger from "../../utils/logger";
+import logger from "../../../utils/logger";
 
 /**
  * Defines the body of the tables' table.
@@ -10,14 +10,14 @@ import React from "react";
  * @returns {JSX.Element}
  */
 
-function TablesBody({ columns, tables }) {
-  // const file_name = "TablesBody";
-  // logger.info({
-  //   file_name,
-  //   method_name: file_name,
-  //   message: `started ${file_name}`,
-  //   params: `tables: ${tables}, columns: ${columns}`,
-  // });
+function BodyWOFinish({ columns, tables }) {
+  const file_name = "BodyWOFinish";
+  logger.info({
+    file_name,
+    method_name: file_name,
+    message: `started ${file_name}`,
+    params: `tables: ${tables}, columns: ${columns}`,
+  });
 
   const tableRows = tables.map((table) => {
     const availability = table.reservation_id ? "occupied" : "free";
@@ -25,7 +25,7 @@ function TablesBody({ columns, tables }) {
     return (
       <tr key={table.table_id}>
         {columns.map(({ accessor }) => {
-          if (accessor === "reservation_id") {
+          if (accessor === "available") {
             tData = availability;
           } else {
             tData = table[accessor] ? table[accessor] : "——";
@@ -42,4 +42,4 @@ function TablesBody({ columns, tables }) {
   );
 }
 
-export default TablesBody;
+export default BodyWOFinish;

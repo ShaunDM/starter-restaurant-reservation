@@ -22,11 +22,18 @@ function CreateReservation() {
     mobile_number: "",
     reservation_date: "",
     reservation_time: "",
-    people: 2,
+    people: 1,
   };
 
   const [error, setError] = useState(null);
   const [reservation, setReservation] = useState(reservationInit);
+
+  // if (reservation.mobile_number.length < 4) {
+  //   setReservation({
+  //     ...reservation,
+  //     mobile_number: reservation.mobile_number.replace(/[^0-9]/, ""),
+  //   });
+  // }
 
   function cancelHandler() {
     // const method_name = "cancelHandler";

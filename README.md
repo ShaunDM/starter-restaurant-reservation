@@ -1,5 +1,9 @@
 # Restaurant Reservation System
 
+## Currently a work in progress.
+
+To see completed application switch to branch: passed_thinkful.
+
 ## Purpose
 
 An internal table and reservation management system for restaurants.

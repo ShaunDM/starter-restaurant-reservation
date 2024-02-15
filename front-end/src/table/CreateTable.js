@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useHistory } from "react-router-dom";
 import { createTable } from "../utils/api";
 import ErrorAlert from "../layout/ErrorAlert";
-// import logger from "../utils/logger";
+import logger from "../utils/logger";
 
 /**
  * Defines the page for a user to create a table.
@@ -10,38 +10,29 @@ import ErrorAlert from "../layout/ErrorAlert";
  */
 
 function CreateTable() {
-  // const file_name = "SeatTable";
-  // logger.info({
-  //   file_name,
-  //   method_name: file_name,
-  //   message: `started ${file_name}`,
-  // });
+  const file_name = "CreateTable";
+  logger.info({
+    file_name,
+    method_name: file_name,
+    message: `started ${file_name}`,
+  });
+
   const history = useHistory();
   const [error, setError] = useState(null);
-
   const [table, setTable] = useState({
     table_name: "",
     capacity: "",
   });
 
-  function cancelHandler() {
-    // const method_name = "cancelHandler";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    // });
-    history.goBack();
-  }
-
   function changeHandler({ target, target: { name, value } }) {
-    // const method_name = "changeHandler";
-    // logger.trace({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `target: ${target}`,
-    // });
+    const method_name = "changeHandler";
+    logger.trace({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+      params: `target: ${target}`,
+    });
+
     if (name === "capacity") {
       setTable((previousTable) => ({
         ...previousTable,
@@ -55,26 +46,40 @@ function CreateTable() {
     }
   }
 
+  function cancelHandler() {
+    const method_name = "cancelHandler";
+    logger.debug({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+    });
+    history.goBack();
+  }
+
   function submitHandler(event) {
-    // const method_name = "submitHandler";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `table: ${table}`,
-    // });
+    const method_name = "submitHandler";
+    logger.debug({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+      params: `table: ${table}`,
+    });
+
     event.preventDefault();
+    const abortController = new AbortController();
     createTable(table)
       .then((response) => {
-        // logger.trace({
-        //   file_name,
-        //   method_name: `${method_name}/createTable`,
-        //   message: `valid`,
-        //   params: `Response: ${response}`,
-        // });
+        logger.trace({
+          file_name,
+          method_name: `${method_name}/createTable`,
+          message: `valid`,
+          params: `Response: ${response}`,
+        });
+
         history.push("/");
       })
       .catch(setError);
+    return () => abortController.abort();
   }
 
   return (
@@ -95,7 +100,7 @@ function CreateTable() {
               name="table_name"
               type="text"
               placeholder="Must be at least 2 characters"
-              // minlength="2"
+              minlength="2"
               value={table.table_name}
               onChange={changeHandler}
               required={true}
@@ -110,8 +115,8 @@ function CreateTable() {
               id="capacity"
               name="capacity"
               type="number"
-              placeholder="Must at least seat 1"
-              // min="1"
+              placeholder="Must seat at least 1"
+              min="1"
               value={table.capacity}
               onChange={changeHandler}
               required={true}

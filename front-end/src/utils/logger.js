@@ -1,7 +1,12 @@
 import pino from "pino";
 require("dotenv").config();
 
-const LOG_LEVEL = process.env.REACT_APP_LOG_LEVEL || "info";
+const LOG_LEVEL = parseInt(process.env.REACT_APP_LOG_LEVEL) || 30;
+const API_BASE_URL =
+  process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
+
+const headers = new Headers();
+headers.append("Content-Type", "application/json");
 
 async function fetchJson(url, options, onCancel) {
   try {
@@ -26,27 +31,33 @@ async function fetchJson(url, options, onCancel) {
   }
 }
 
-const API_BASE_URL =
-  process.env.REACT_APP_API_BASE_URL || "http://localhost:5001";
-const headers = new Headers();
-headers.append("Content-Type", "application/json");
+const levels = [
+  { label: "trace", value: 10 },
+  { label: "debug", value: 20 },
+  { label: "info", value: 30 },
+  { label: "warn", value: 40 },
+  { label: "error", value: 50 },
+  { label: "fatal", value: 60 },
+];
 
-const send = async function (level, logEvent, a, b) {
-  const url = `${API_BASE_URL}/logging`;
-  await fetchJson(url, {
-    method: "POST",
-    headers,
-    body: JSON.stringify({ data: logEvent }),
-  });
-};
+async function createLog(logEvent, LOG_LEVEL) {
+  logEvent.level = levels.filter((e) => logEvent.level === e.value)[0];
+  if (logEvent.level >= LOG_LEVEL) {
+    const url = `${API_BASE_URL}/logging`;
+    await fetchJson(url, {
+      method: "POST",
+      headers,
+      body: JSON.stringify({ data: logEvent }),
+    });
+  }
+}
 
 const logger = pino({
   browser: {
     serialize: true,
     asObject: true,
-    transmit: {
-      level: LOG_LEVEL,
-      send,
+    write: (logEvent) => {
+      createLog(logEvent, LOG_LEVEL);
     },
   },
 });

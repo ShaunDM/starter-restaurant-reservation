@@ -10,7 +10,7 @@ function TablesHead({
     { label: "Table ID", accessor: "table_id" },
     { label: "Table Name", accessor: "table_name" },
     { label: "Capacity", accessor: "capacity" },
-    { label: "Availability", accessor: "reservation_id" },
+    { label: "Available", accessor: "available" },
   ],
 }) {
   return (

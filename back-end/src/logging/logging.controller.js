@@ -39,9 +39,9 @@ function hasRequestId(req, res, next) {
 function hasProperty(property, req, res, next) {
   const methodName = `hasProperty('${property}')`;
   req.log.debug({ __filename, methodName, body: req.body });
-  const { messages, level } = req.body.data;
+  const { data } = req.body;
   if (property === "label" || property === "value") {
-    if (!level[property]) {
+    if (!data.level[property]) {
       const message = `Log level must include a ${property} property.`;
       req.log.trace({ __filename, methodName, valid: false }, message);
       return next({
@@ -49,12 +49,8 @@ function hasProperty(property, req, res, next) {
         message: message,
       });
     }
-    res.locals.log = {
-      ...res.locals.log,
-      [property]: req.body.data.level[property],
-    };
   } else {
-    if (!messages[0][property]) {
+    if (data[property]) {
       const message = `Log message must include a ${property} property.`;
       req.log.trace({ __filename, methodName, valid: false }, message);
       return next({
@@ -62,12 +58,7 @@ function hasProperty(property, req, res, next) {
         message: message,
       });
     }
-    res.locals.log = {
-      ...res.locals.log,
-      [property]: messages[0][property],
-    };
   }
-
   req.log.trace({ __filename, methodName, valid: true });
 }
 
