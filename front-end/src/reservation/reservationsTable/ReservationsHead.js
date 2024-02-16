@@ -1,5 +1,5 @@
 /**
- * Defiines the head of the reservations table
+ * Defines the head of the reservations table
  *  @param columns
  *  the labels and accessors for the columns of the reservations table.
  * @returns {JSX.Element}

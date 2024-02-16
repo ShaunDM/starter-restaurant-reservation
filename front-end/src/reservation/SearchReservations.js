@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { searchReservations } from "../utils/api";
 import ReservationsTable from "./reservationsTable/ReservationsTable";
 import ErrorAlert from "../layout/ErrorAlert";
-// import logger from "../utils/logger";
+import logger from "../utils/logger";
 
 /**
  * Defines the search page, user searches for reservations by mobile_number.
@@ -11,12 +11,12 @@ import ErrorAlert from "../layout/ErrorAlert";
  */
 
 function SearchReservations() {
-  // const file_name = "SearchReservations";
-  // logger.info({
-  //   file_name,
-  //   method_name: file_name,
-  //   message: `started ${file_name}`,
-  // });
+  const file_name = "SearchReservations";
+  logger.info({
+    file_name,
+    method_name: file_name,
+    message: `started ${file_name}`,
+  });
 
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
@@ -26,13 +26,13 @@ function SearchReservations() {
   useEffect(loadResults, [load]);
 
   function loadResults() {
-    // const method_name = "loadResults";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `query: ${query}`,
-    // });
+    const method_name = "loadResults";
+    logger.debug({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+      params: `query: ${load}`,
+    });
     if (!load) {
       return;
     }
@@ -40,12 +40,12 @@ function SearchReservations() {
     setReservationsError(null);
     searchReservations(load, abortController.signal)
       .then((response) => {
-        // logger.trace({
-        //   file_name,
-        //   method_name: `${method_name}/searchReservations`,
-        //   message: `valid`,
-        //   params: `Response: ${response}`,
-        // });
+        logger.trace({
+          file_name,
+          method_name: `${method_name}/searchReservations`,
+          message: `valid`,
+          params: `Response: ${response}`,
+        });
         setReservations(response);
       })
       .catch(setReservationsError);
@@ -53,24 +53,24 @@ function SearchReservations() {
   }
 
   function changeHandler({ target }) {
-    // const method_name = "changeHandler";
-    // logger.trace({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `target: ${target}`,
-    // });
+    const method_name = "changeHandler";
+    logger.trace({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+      params: `target: ${target}`,
+    });
     setQuery(target.value);
   }
 
   function submitHandler(event) {
-    // const method_name = "submitHandler";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `query: ${query}`,
-    // });
+    const method_name = "submitHandler";
+    logger.debug({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+      params: `query: ${query}`,
+    });
     event.preventDefault();
     setLoad(query);
   }

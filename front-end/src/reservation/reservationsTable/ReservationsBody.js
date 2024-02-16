@@ -2,7 +2,8 @@ import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import { changeReservationStatus, readReservation } from "../../utils/api";
 import ErrorAlert from "../../layout/ErrorAlert";
-// import logger from "../../utils/logger";
+import logger from "../../utils/logger";
+import { today } from "../../utils/date-time";
 
 /**
  * Defines the body of the reservation's table.
@@ -14,33 +15,27 @@ import ErrorAlert from "../../layout/ErrorAlert";
  */
 
 function ReservationsBody({ reservations, columns }) {
-  // const file_name = "ReservationsBody";
-  // logger.info({
-  //   file_name,
-  //   method_name: file_name,
-  //   message: `started ${file_name}`,
-  //   params: `reservations: ${reservations}, columns: ${columns}`,
-  // });
+  const file_name = "ReservationsBody";
+  logger.info({
+    file_name,
+    method_name: file_name,
+    message: `started ${file_name}`,
+    params: `reservations: ${reservations}, columns: ${columns}`,
+  });
 
   //Was going to adjust so that the reservation could only be seated if it was for today's date, but caused tests to fail.
-
-  // let today = new Date();
-  // const dd = String(today.getDate()).padStart(2, "0");
-  // const mm = String(today.getMonth() + 1).padStart(2, "0"); //January is 0!
-  // const yyyy = today.getFullYear();
-  // today = yyyy + "-" + mm + "-" + dd;
 
   const [error, setError] = useState(null);
   const history = useHistory();
 
   if (reservations && reservations.length) {
     function cancelHandler({ target }) {
-      // const method_name = "cancelHandler";
-      // logger.debug({
-      //   file_name,
-      //   method_name,
-      //   message: `started ${method_name}`,
-      // });
+      const method_name = "cancelHandler";
+      logger.debug({
+        file_name,
+        method_name,
+        message: `started ${method_name}`,
+      });
 
       if (window.confirm("Do you want to cancel this reservation?")) {
         const abortController = new AbortController();
@@ -51,12 +46,12 @@ function ReservationsBody({ reservations, columns }) {
             abortController.signal
           )
             .then((response) => {
-              // logger.trace({
-              //   file_name,
-              //   method_name: `${method_name}/readReservation`,
-              //   message: `valid`,
-              //   params: `Response: ${response}`,
-              // });
+              logger.trace({
+                file_name,
+                method_name: `${method_name}/readReservation`,
+                message: `valid`,
+                params: `Response: ${response}`,
+              });
               history.goBack();
             })
             .catch((err) => {
@@ -115,7 +110,13 @@ function ReservationsBody({ reservations, columns }) {
         <tr key={reservation.reservation_id}>
           {columns.map(({ accessor }) => {
             if (accessor === "seat") {
-              return reservation.status === "booked" ? addSeat : addNoSeat;
+              if (
+                reservation.reservation_date !== today() ||
+                reservation.status !== "booked"
+              ) {
+                return addNoSeat;
+              }
+              return addSeat;
             } else if (accessor === "edit") {
               return addEdit;
             } else if (accessor === "cancel_reservation") {

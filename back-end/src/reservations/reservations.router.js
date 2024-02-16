@@ -19,11 +19,7 @@ router
   .options(corsPost)
   .all(methodNotAllowed);
 
-router.use(
-  "/:reservation_Id/tables",
-  controller.reservationExists,
-  tablesRouter
-);
+router.use("/:reservation_Id/tables", controller.updateStatus, tablesRouter);
 
 router
   .route("/:reservation_Id/status")

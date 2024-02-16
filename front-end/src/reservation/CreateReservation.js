@@ -3,7 +3,7 @@ import { useHistory } from "react-router-dom/cjs/react-router-dom.min";
 import ReservationForm from "./ReservationForm";
 import ErrorAlert from "../layout/ErrorAlert";
 import { createReservation } from "../utils/api";
-// import { today } from "../utils/date-time";
+import logger from "../utils/logger";
 
 /**
  * Defines the page to create reservations.
@@ -12,7 +12,12 @@ import { createReservation } from "../utils/api";
  */
 
 function CreateReservation() {
-  //Can't use mins or maxes for the html inputs as it prevents thinkful tests from submitting to server and consequently failing tests, today function was going to be min for date.
+  const file_name = "CreateReservation";
+  logger.info({
+    file_name,
+    method_name: file_name,
+    message: `started ${file_name}`,
+  });
 
   const history = useHistory();
 
@@ -28,32 +33,25 @@ function CreateReservation() {
   const [error, setError] = useState(null);
   const [reservation, setReservation] = useState(reservationInit);
 
-  // if (reservation.mobile_number.length < 4) {
-  //   setReservation({
-  //     ...reservation,
-  //     mobile_number: reservation.mobile_number.replace(/[^0-9]/, ""),
-  //   });
-  // }
-
   function cancelHandler() {
-    // const method_name = "cancelHandler";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `reservation_id: ${reservation_id}`,
-    // });
+    const method_name = "cancelHandler";
+    logger.debug({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+      params: `reservation_id: ${reservation.reservation_id}`,
+    });
     history.push("/");
   }
 
   function changeHandler({ target, target: { name, value } }) {
-    // const method_name = "changeHandler";
-    // logger.trace({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `target: ${target}`,
-    // });
+    const method_name = "changeHandler";
+    logger.trace({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+      params: `target: ${target}`,
+    });
     if (name === "people") {
       setReservation({ ...reservation, people: parseInt(value) });
     } else {
@@ -65,24 +63,24 @@ function CreateReservation() {
   }
 
   function submitHandler(event) {
-    // const method_name = "submitHandler";
-    // logger.debug({
-    //   file_name,
-    //   method_name,
-    //   message: `started ${method_name}`,
-    //   params: `reservation: ${reservation}`,
-    // });
+    const method_name = "submitHandler";
+    logger.debug({
+      file_name,
+      method_name,
+      message: `started ${method_name}`,
+      params: `reservation: ${reservation}`,
+    });
     event.preventDefault();
     const abortController = new AbortController();
 
     createReservation(reservation)
       .then((response) => {
-        // logger.trace({
-        //   file_name,
-        //   method_name: `${method_name}/createReservation`,
-        //   message: `valid`,
-        //   params: `Response: ${response}`,
-        // });
+        logger.trace({
+          file_name,
+          method_name: `${method_name}/createReservation`,
+          message: `valid`,
+          params: `Response: ${response}`,
+        });
         history.push(`/dashboard?date=${reservation.reservation_date}`);
       })
       .catch(setError);

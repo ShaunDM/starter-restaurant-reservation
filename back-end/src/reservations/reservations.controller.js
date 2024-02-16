@@ -5,9 +5,9 @@
 const service = require("./reservations.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
 
-/**
- * Checks req.query for a date or mobile_number query.
- */
+//list
+
+//Checks req.query for a date or mobile_number query.
 
 function hasQuery(req, res, next) {
   const methodName = "hasQuery";
@@ -60,6 +60,8 @@ async function list(req, res) {
   req.log.trace({ __filename, methodName, return: true, data: data });
 }
 
+//read
+
 async function reservationExists(req, res, next) {
   const methodName = "reservationExists";
   req.log.debug({ __filename, methodName, body: req.body, params: req.params });
@@ -84,6 +86,8 @@ function read(req, res) {
   });
   req.log.trace({ __filename, methodName, return: true, data: reservation });
 }
+
+//create
 
 //checks the day of the week to ensure valid, concat adds time element so that it's not checking against an inappropriate time zone upon date creation.
 
@@ -252,7 +256,7 @@ async function create(req, res) {
   });
 }
 
-//update reservation status
+//update reservation
 
 function reservationStatusIsNotFinished(req, res, next) {
   const methodName = "reservationStatusIsNotFinished";
@@ -261,6 +265,22 @@ function reservationStatusIsNotFinished(req, res, next) {
   if (status === "finished") {
     const message =
       "Reservation status cannot be updated if it is already 'finished'.";
+    next({
+      status: 400,
+      message: message,
+    });
+    req.log.trace({ __filename, methodName, valid: false }, message);
+  }
+  next();
+}
+
+function reservationStatusIsNotCancelled(req, res, next) {
+  const methodName = "reservationStatusIsNotCancelled";
+  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  const { status } = res.locals.reservation;
+  if (status === "cancelled") {
+    const message =
+      "Reservation status cannot be updated if it is already 'cancelled'.";
     next({
       status: 400,
       message: message,
@@ -295,6 +315,28 @@ function hasValidStatus(req, res, next) {
   req.log.trace({ __filename, methodName, valid: false }, message);
 }
 
+function isToday(req, res, next) {
+  const methodName = "isToday";
+  req.log.debug({ __filename, methodName, body: req.body });
+  const { status, reservation_date } = req.body.data;
+  if (status !== "seated" && status !== "finished") {
+    return next();
+  }
+  const todayStr = new Date(Date.now()).toString();
+  const todayArr = todayStr.split(" ");
+  todayArr.shift();
+  todayArr.splice(3, todayArr.length - 1);
+  const today = todayArr.join("/");
+  if (reservation_date !== today) {
+    const message = `Reservation can only be seated/finished for today's date.`;
+    next({
+      status: 400,
+      message: message,
+    });
+  }
+  next();
+}
+
 async function update(req, res) {
   const methodName = "update";
   req.log.debug({ __filename, methodName, body: req.body });
@@ -308,14 +350,34 @@ async function update(req, res) {
   });
 }
 
+//update reservation status
+
+function setStatus(req, res, next) {
+  const methodName = "setStatus";
+  req.log.debug({ __filename, methodName, path: req.path, locals: res.locals });
+  res.locals.reservation.status = req.path + "ed";
+  next();
+}
+
+function checkStatus(req, res, next) {
+  const methodName = "checkStatus";
+  req.log.debug({ __filename, methodName, locals: res.locals });
+  const { status } = res.locals.reservation;
+  if (status !== "seated" && status !== "finished") {
+    const message = `Reservation status updates through this method must be updated to either seated or finished.`;
+    next({
+      status: 400,
+      message: message,
+    });
+    req.log.trace({ __filename, methodName, valid: false }, message);
+  }
+  next();
+}
+
 async function updateStatus(req, res) {
   const methodName = "updateStatus";
-  req.log.debug({ __filename, methodName, body: req.body });
-  const reservationUpdate = {
-    ...res.locals.reservation,
-    status: req.body.data.status,
-  };
-  const updatedReservation = await service.update(reservationUpdate);
+  req.log.debug({ __filename, methodName, locals: res.locals });
+  const updatedReservation = await service.update(res.locals.reservation);
   res.status(200).json({ data: updatedReservation[0] });
   req.log.trace({
     __filename,
@@ -344,12 +406,16 @@ module.exports = {
     hasValidDate,
     hasValidPeople,
     hasValidMobile,
+    hasValidStatus,
+    isToday,
     asyncErrorBoundary(update),
   ],
   updateStatus: [
     asyncErrorBoundary(reservationExists),
     reservationStatusIsNotFinished,
-    hasValidStatus,
+    reservationStatusIsNotCancelled,
+    setStatus,
+    checkStatus,
     asyncErrorBoundary(updateStatus),
   ],
   reservationExists,
