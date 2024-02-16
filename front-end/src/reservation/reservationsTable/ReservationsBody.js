@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Link, useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import { changeReservationStatus, readReservation } from "../../utils/api";
+import { cancelReservation } from "../../utils/api";
 import ErrorAlert from "../../layout/ErrorAlert";
 import logger from "../../utils/logger";
 import { today } from "../../utils/date-time";
@@ -40,24 +40,19 @@ function ReservationsBody({ reservations, columns }) {
       if (window.confirm("Do you want to cancel this reservation?")) {
         const abortController = new AbortController();
         setError(null);
-        readReservation(target.value, abortController.signal).then((result) =>
-          changeReservationStatus(
-            { ...result, status: "cancelled" },
-            abortController.signal
-          )
-            .then((response) => {
-              logger.trace({
-                file_name,
-                method_name: `${method_name}/readReservation`,
-                message: `valid`,
-                params: `Response: ${response}`,
-              });
-              history.goBack();
-            })
-            .catch((err) => {
-              setError(err);
-            })
-        );
+        cancelReservation(target.value, abortController.signal)
+          .then((response) => {
+            logger.trace({
+              file_name,
+              method_name: `${method_name}/cancelReservation`,
+              message: `valid`,
+              params: `Response: ${response}`,
+            });
+            history.goBack();
+          })
+          .catch((err) => {
+            setError(err);
+          });
         return () => abortController.abort();
       }
     }

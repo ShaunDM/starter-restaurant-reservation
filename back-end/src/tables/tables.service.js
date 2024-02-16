@@ -5,11 +5,14 @@
 
 const knex = require("../db/connection");
 
+async function read(id) {
+  return knex("tables").where({ table_id: id }).select("*").first();
+}
+
 async function list() {
-  return knex("tables as t")
-    .join("tables_reservations as tr", "t.table_id", "tr.table_id")
-    .select("t.table_name", "t.table_id", "t.capacity", "tr.reservation_id")
-    .orderBy("t.table_name");
+  return knex("tables")
+    .select("table_id", "table_name", "capacity", "reservation_id")
+    .orderBy("table_name");
 }
 
 async function create(newTable) {
@@ -19,56 +22,7 @@ async function create(newTable) {
     .then((createdTables) => createdTables[0]);
 }
 
-async function insertTableToTableReservations(table_id, reservation_id) {
-  return knex("tables_reservations").insert({
-    table_id: table_id,
-    reservation_id: reservation_id,
-  });
-}
-
-async function readTable(id) {
-  return knex("tables").where({ table_id: id }).select("*").first();
-}
-
-async function readAvailable(id) {
-  return knex("tables_reservations")
-    .where({ table_id: id })
-    .select("*")
-    .first();
-}
-
-async function readReservation(id) {
-  return knex("reservations").where({ reservation_id: id }).first().select("*");
-}
-
-async function update(table) {
-  const { table_id } = table;
-  return knex("tables_reservations")
-    .returning("*")
-    .where({ table_id: table_id })
-    .first()
-    .update(table);
-}
-
-async function destroy(id) {
-  return knex("tables_reservations").where({ table_id: id }).del();
-}
-
-async function updateReservations(reservation) {
-  return knex("reservations")
-    .where({ reservation_id: reservation.reservation_id })
-    .first()
-    .update(reservation);
-}
-
-async function tableReservationExists(id) {
-  return knex("tables_reservations")
-    .where({ table_id: id })
-    .first()
-    .select("tables_reservations.reservation_id");
-}
-
-async function updateTables(table, reservation_id) {
+async function update(table, reservation_id) {
   return knex("tables")
     .where({ table_id: table.table_id })
     .first()
@@ -76,15 +30,8 @@ async function updateTables(table, reservation_id) {
 }
 
 module.exports = {
+  read,
   list,
   create,
-  insertTableToTableReservations,
-  readTable,
-  readAvailable,
-  readReservation,
   update,
-  destroy,
-  updateReservations,
-  tableReservationExists,
-  updateTables,
 };

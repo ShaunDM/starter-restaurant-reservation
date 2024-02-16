@@ -19,20 +19,36 @@ router
   .options(corsPost)
   .all(methodNotAllowed);
 
-router.use("/:reservation_Id/tables", controller.updateStatus, tablesRouter);
+router.use(
+  "/:reservation_id/edit/tables",
+  corsPut,
+  controller.update,
+  tablesRouter
+);
+
+router.use(
+  "/:reservation_id/tables",
+  corsPut,
+  controller.updateStatus,
+  tablesRouter
+);
 
 router
-  .route("/:reservation_Id/status")
+  .route("/:reservation_id/edit")
+  .put(corsPut, controller.update)
+  .options(corsPut)
+  .all(methodNotAllowed);
+
+router
+  .route("/:reservation_id/cancel")
   .put(corsPut, controller.updateStatus)
   .options(corsPut)
   .all(methodNotAllowed);
 
 router
-  .route("/:reservation_Id")
+  .route("/:reservation_id")
   .get(corsGet, controller.read)
   .options(corsGet)
-  .put(corsPut, controller.update)
-  .options(corsPut)
   .all(methodNotAllowed);
 
 router

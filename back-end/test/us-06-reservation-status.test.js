@@ -32,7 +32,7 @@ describe("US-06 - Reservation status", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -62,7 +62,7 @@ describe("US-06 - Reservation status", () => {
         };
 
         const response = await request(app)
-          .post("/reservations")
+          .post("/reservations/new")
           .set("Accept", "application/json")
           .send({ data });
 
@@ -155,9 +155,11 @@ describe("US-06 - Reservation status", () => {
       expect(reservationOne).not.toBeUndefined();
 
       const seatResponse = await request(app)
-        .put(`/tables/${tableOne.table_id}/seat`)
+        .put(
+          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+        )
         .set("Accept", "application/json")
-        .send({ data: { reservation_id: reservationOne.reservation_id } });
+        .send({ data: { status: "seated" } });
 
       expect(seatResponse.body.error).toBeUndefined();
       expect(seatResponse.status).toBe(200);
@@ -176,24 +178,28 @@ describe("US-06 - Reservation status", () => {
       expect(reservationOne).not.toBeUndefined();
 
       const firstSeatResponse = await request(app)
-        .put(`/tables/${tableOne.table_id}/seat`)
+        .put(
+          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+        )
         .set("Accept", "application/json")
-        .send({ data: { reservation_id: reservationOne.reservation_id } });
+        .send({ data: { status: "seated" } });
 
       expect(firstSeatResponse.body.error).toBeUndefined();
       expect(firstSeatResponse.status).toBe(200);
 
       const secondSeatResponse = await request(app)
-        .put(`/tables/${tableTwo.table_id}/seat`)
+        .put(
+          `reservations/${reservationOne.reservation_id}/tables/${tableTwo.table_id}/seat`
+        )
         .set("Accept", "application/json")
-        .send({ data: { reservation_id: reservationOne.reservation_id } });
+        .send({ data: { status: "seated" } });
 
       expect(secondSeatResponse.body.error).toContain("seated");
       expect(secondSeatResponse.status).toBe(400);
     });
   });
 
-  describe("DELETE /tables/:table_id/seat", () => {
+  describe("PUT reservations/:reservation_id/tables/:table_id/finish", () => {
     let reservationOne;
     let tableOne;
 
@@ -209,17 +215,21 @@ describe("US-06 - Reservation status", () => {
       expect(reservationOne).not.toBeUndefined();
 
       const seatResponse = await request(app)
-        .put(`/tables/${tableOne.table_id}/seat`)
+        .put(
+          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+        )
         .set("Accept", "application/json")
-        .send({ data: { reservation_id: reservationOne.reservation_id } });
+        .send({ data: { status: "seated" } });
 
       expect(seatResponse.body.error).toBeUndefined();
       expect(seatResponse.status).toBe(200);
 
       const finishResponse = await request(app)
-        .delete(`/tables/${tableOne.table_id}/seat`)
+        .put(
+          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/finish`
+        )
         .set("Accept", "application/json")
-        .send({ data: { reservation_id: reservationOne.reservation_id } });
+        .send({ data: { status: "finished" } });
 
       expect(finishResponse.body.error).toBeUndefined();
       expect(finishResponse.status).toBe(200);
@@ -253,17 +263,21 @@ describe("US-06 - Reservation status", () => {
       expect(reservationOne).not.toBeUndefined();
 
       const seatResponse = await request(app)
-        .put(`/tables/${tableOne.table_id}/seat`)
+        .put(
+          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+        )
         .set("Accept", "application/json")
-        .send({ data: { reservation_id: reservationOne.reservation_id } });
+        .send({ data: { status: "seated" } });
 
       expect(seatResponse.body.error).toBeUndefined();
       expect(seatResponse.status).toBe(200);
 
       const finishResponse = await request(app)
-        .delete(`/tables/${tableOne.table_id}/seat`)
+        .put(
+          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/finish`
+        )
         .set("Accept", "application/json")
-        .send({ data: { reservation_id: reservationOne.reservation_id } });
+        .send({ data: { status: "finished" } });
 
       expect(finishResponse.body.error).toBeUndefined();
       expect(finishResponse.status).toBe(200);

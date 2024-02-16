@@ -31,12 +31,6 @@ async function update(reservation) {
     .update(reservation);
 }
 
-// async function search(number) {
-//   return knex("reservations")
-//     .whereLike("mobile_number", `%${number}%`)
-//     .select("*");
-// }
-
 module.exports = {
   listByDate,
   listBySearch,

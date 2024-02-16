@@ -19,18 +19,22 @@ describe("US-05 - Finish an occupied table", () => {
     return await knex.migrate.rollback(null, true).then(() => knex.destroy());
   });
 
-  describe("DELETE /tables/:table_id/seat", () => {
+  describe("PUT reservations/:reservation_id/tables/:table_id/finish", () => {
     let barTableOne;
     let tableOne;
+    let reservation;
 
     beforeEach(async () => {
       barTableOne = await knex("tables").where("table_name", "Bar #1").first();
       tableOne = await knex("tables").where("table_name", "#1").first();
+      reservation = await knex("reservations")
+        .where("reservation_id", "1")
+        .first();
     });
 
     test("returns 404 for non-existent table_id", async () => {
       const response = await request(app)
-        .delete("/tables/99/seat")
+        .put(`reservations/${reservation.reservation_id}/tables/99/seat`)
         .set("Accept", "application/json")
         .send({ datum: {} });
 
@@ -52,16 +56,21 @@ describe("US-05 - Finish an occupied table", () => {
       expect(tableOne).not.toBeUndefined();
 
       const seatResponse = await request(app)
-        .put(`/tables/${tableOne.table_id}/seat`)
+        .put(
+          `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
+        )
         .set("Accept", "application/json")
-        .send({ data: { reservation_id: 1 } });
+        .send({ data: { status: "seated" } });
 
       expect(seatResponse.body.error).toBeUndefined();
       expect(seatResponse.status).toBe(200);
 
       const finishResponse = await request(app)
-        .delete(`/tables/${tableOne.table_id}/seat`)
-        .set("Accept", "application/json");
+        .put(
+          `reservations/${reservation_id}/tables/${tableOne.table_id}/finish`
+        )
+        .set("Accept", "application/json")
+        .send({ data: { status: "finish" } });
 
       expect(finishResponse.body.error).toBeUndefined();
       expect(finishResponse.status).toBe(200);

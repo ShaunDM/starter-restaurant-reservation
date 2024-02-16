@@ -31,7 +31,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/999999")
+        .put("/reservations/999999/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -60,7 +60,7 @@ describe("US-08 - Change an existing reservation", () => {
       );
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data: reservation });
 
@@ -86,7 +86,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -105,7 +105,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -123,7 +123,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -142,7 +142,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -160,7 +160,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -179,7 +179,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -197,7 +197,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -216,7 +216,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -234,7 +234,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -252,7 +252,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -270,7 +270,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -288,7 +288,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -306,7 +306,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -325,7 +325,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -344,7 +344,7 @@ describe("US-08 - Change an existing reservation", () => {
       };
 
       const response = await request(app)
-        .put("/reservations/1")
+        .put("/reservations/1/edit")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -353,7 +353,7 @@ describe("US-08 - Change an existing reservation", () => {
     });
   });
 
-  describe("PUT /reservations/:reservation_id/status", () => {
+  describe("PUT /reservations/:reservation_id/cancel", () => {
     test("returns 200 for status cancelled", async () => {
       const reservation = await knex("reservations")
         .orderBy(["reservation_date", "reservation_time"])
@@ -364,7 +364,7 @@ describe("US-08 - Change an existing reservation", () => {
       const status = "cancelled";
 
       const response = await request(app)
-        .put(`/reservations/${reservation.reservation_id}/status`)
+        .put(`/reservations/${reservation.reservation_id}/cancel`)
         .set("Accept", "application/json")
         .send({ data: { status } });
 

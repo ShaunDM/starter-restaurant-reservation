@@ -46,7 +46,7 @@ describe("US-01 - Create and list reservations", () => {
   describe("POST /reservations", () => {
     test("returns 400 if data is missing", async () => {
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ datum: {} });
 
@@ -64,7 +64,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -83,7 +83,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -101,7 +101,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -120,7 +120,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -138,7 +138,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -157,7 +157,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -175,7 +175,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -194,7 +194,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -213,7 +213,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -231,7 +231,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -250,7 +250,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -269,7 +269,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -287,7 +287,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -306,7 +306,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -325,7 +325,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -344,7 +344,7 @@ describe("US-01 - Create and list reservations", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 

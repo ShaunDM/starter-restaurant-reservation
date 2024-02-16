@@ -31,7 +31,7 @@ describe("US-02 - Create reservations future date", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
@@ -49,7 +49,7 @@ describe("US-02 - Create reservations future date", () => {
       };
 
       const response = await request(app)
-        .post("/reservations")
+        .post("/reservations/new")
         .set("Accept", "application/json")
         .send({ data });
 
