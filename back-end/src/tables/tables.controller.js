@@ -32,11 +32,14 @@ function hasProperty(property, req, res, next) {
   const { data } = req.body;
   if (!data[property]) {
     const message = `Table must include a ${property} property.`;
-    next({
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
-    req.log.trace({ __filename, methodName, valid: false }, message);
   } else {
     req.log.trace({ __filename, methodName, valid: true });
   }
@@ -51,14 +54,18 @@ function hasValidProperties(req, res, next) {
   req.log.debug({ __filename, methodName, body: req.body });
   if (!req.body.data) {
     const message = "body must have a data property";
-    next({ status: 400, message: message });
-    req.log.trace({ __filename, methodName, valid: false }, message);
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   const needsProperties = ["table_name", "capacity"];
   needsProperties.forEach((property) => {
     hasProperty(property, req, res, next);
   });
   req.log.trace({ __filename, methodName, valid: true });
+  next();
 }
 
 function hasValidNameLength(req, res, next) {
@@ -67,14 +74,17 @@ function hasValidNameLength(req, res, next) {
   const { table_name } = req.body.data;
   if (parseInt(table_name.length) < 2) {
     const message = "table_name must be at least two characters in length.";
-    next({
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
-    req.log.trace({ __filename, methodName, valid: false }, message);
   }
-  next();
   req.log.trace({ __filename, methodName, valid: true });
+  next();
 }
 
 function hasValidCapacity(req, res, next) {
@@ -83,16 +93,22 @@ function hasValidCapacity(req, res, next) {
   const { capacity } = req.body.data;
   if (!Number.isInteger(capacity)) {
     const message = "Table capacity is not a number";
-    next({ status: 400, message: message });
-    req.log.trace({ __filename, methodName, valid: false }, message);
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   if (capacity < 1) {
     const message = "Capacity has a minimum amount of 1.";
-    next({ status: 400, message: message });
-    req.log.trace({ __filename, methodName, valid: false }, message);
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({ status: 400, message: message });
   }
-  next();
   req.log.trace({ __filename, methodName, valid: true });
+  next();
 }
 
 async function create(req, res) {
@@ -100,19 +116,11 @@ async function create(req, res) {
   req.log.debug({ __filename, methodName, body: req.body });
   const { data } = req.body;
   const newTable = await service.create(data);
-  await service.insertTableToTableReservations(
-    newTable.table_id,
-    newTable.reservation_id
-  );
   res.status(201).json({ data: newTable });
   req.log.trace({ __filename, methodName, return: true, data: newTable });
 }
 
 //update
-
-/**
- * Passes an array of needed properties to hasValidProperties to check for in put requests.
- */
 
 async function tableExists(req, res, next) {
   const methodName = "tableExists";
@@ -125,27 +133,43 @@ async function tableExists(req, res, next) {
     return next();
   }
   const message = `table_id: ${table_id} not found`;
+  req.log.trace(
+    {
+      __filename,
+      methodName,
+      valid: false,
+      body: req.body,
+      params: req.params,
+    },
+    message
+  );
   next({ status: 404, message: message });
-  req.log.trace({ __filename, methodName, valid: false }, message);
 }
 
 function reservationExists(req, res, next) {
   const methodName = "reservationExists";
-  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  req.log.debug({ __filename, methodName, locals: res.locals });
   if (!res.locals.reservation) {
     const message = "No reservation parameter, improper request.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
+    req.log.trace(
+      { __filename, methodName, valid: false, locals: res.locals },
+      message
+    );
     return next({ status: 400, message: message });
   }
+  req.log.trace({ __filename, methodName, valid: true, locals: res.locals });
   next();
 }
 
 function urlHasValidPath(req, res, next) {
   const methodName = "urlHasValidPath";
   req.log.debug({ __filename, methodName, path: req.path });
-  if (req.path !== "seat" && req.path !== "finish") {
-    const message = `URL: ${req.originalUrl} has invalid path: ${req.path}, valid paths are 'seat' or 'finish'.`;
-    req.log.trace({ __filename, methodName, valid: false }, message);
+  if (!req.path.endsWith("seat") && !req.path.endsWith("finish")) {
+    const message = `URL: ${req.originalUrl} has invalid path: ${req.path}, valid paths end with 'seat' or 'finish'.`;
+    req.log.trace(
+      { __filename, methodName, valid: false, path: req.path },
+      message
+    );
     return next({
       status: 400,
       message: message,
@@ -157,35 +181,56 @@ function urlHasValidPath(req, res, next) {
 
 function tableHasCapacity(req, res, next) {
   const methodName = "tableHasCapacity";
-  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  req.log.debug({ __filename, methodName, locals: res.locals });
   const { capacity } = res.locals.table;
   const { people } = res.locals.reservation;
   if (capacity < people) {
     const message = "Table capacity is smaller than reservation party";
-    next({
+    req.log.trace(
+      { __filename, methodName, valid: false, locals: res.locals },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
-    req.log.trace({ __filename, methodName, valid: false }, message);
   }
   req.log.trace({ __filename, methodName, valid: true });
-  return next();
+  next();
 }
 
 function tableHasCorrectStatus(req, res, next) {
   const methodName = "tableHasCorrectStatus";
   req.log.debug({ __filename, methodName, path: req.path, locals: res.locals });
   const { table } = res.locals;
-  if (table.reservation_id && req.path === "seat") {
+  if (table.reservation_id && req.path.endsWith("seat")) {
     const message = `table: ${table.table_name} is occupied`;
-    req.log.trace({ __filename, methodName, valid: false }, message);
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        path: req.path,
+        locals: res.locals,
+      },
+      message
+    );
     return next({
       status: 400,
       message: message,
     });
-  } else if (!table.reservation_id && req.path === "finish") {
+  } else if (!table.reservation_id && req.path.endsWith("finish")) {
     const message = `table: ${table.table_name} is unoccupied`;
-    req.log.trace({ __filename, methodName, valid: false }, message);
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        path: req.path,
+        locals: res.locals,
+      },
+      message
+    );
     return next({
       status: 400,
       message: message,
@@ -199,27 +244,37 @@ function tableHasCorrectStatus(req, res, next) {
 function setStatus(req, res, next) {
   const methodName = "setStatus";
   req.log.debug({ __filename, methodName, path: req.path, locals: res.locals });
-  const { reservation_id } = res.locals.table;
-  if (req.path === "seat") {
-    reservation_id = res.locals.reservation.reservation_id;
+  if (req.path.endsWith("seat")) {
+    res.locals.table.reservation_id = res.locals.reservation.reservation_id;
   } else {
-    reservation_id = null;
+    res.locals.table.reservation_id = null;
   }
-  req.log.trace({ __filename, methodName, valid: true, locals: res.locals });
+  req.log.trace({
+    __filename,
+    methodName,
+    valid: true,
+    path: req.path,
+    locals: res.locals,
+  });
   next();
 }
 
 async function update(req, res) {
   const methodName = "update";
   req.log.debug({ __filename, methodName, locals: res.locals });
-  res.status(200).json({
-    data: await service.update(res.locals.table),
-  });
+  const data = {
+    data: {
+      reservations: res.locals.reservationResponse,
+      tables: await service.update(res.locals.table),
+    },
+  };
+  res.status(200).json({ data });
   req.log.trace({
     __filename,
     methodName,
     return: true,
-    data: res.locals.table,
+    locals: res.locals.table,
+    data,
   });
 }
 

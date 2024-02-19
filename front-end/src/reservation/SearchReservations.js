@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import { searchReservations } from "../utils/api";
 import ReservationsTable from "./reservationsTable/ReservationsTable";
 import ErrorAlert from "../layout/ErrorAlert";
@@ -18,12 +19,14 @@ function SearchReservations() {
     message: `started ${file_name}`,
   });
 
+  const params = new URL(window.location).searchParams;
+  const param = params.get("mobile_number");
+
   const [reservations, setReservations] = useState([]);
   const [reservationsError, setReservationsError] = useState(null);
   const [query, setQuery] = useState("");
-  const [load, setLoad] = useState(null);
 
-  useEffect(loadResults, [load]);
+  useEffect(loadResults, [param]);
 
   function loadResults() {
     const method_name = "loadResults";
@@ -31,25 +34,26 @@ function SearchReservations() {
       file_name,
       method_name,
       message: `started ${method_name}`,
-      params: `query: ${load}`,
+      params: `query: ${param}`,
     });
-    if (!load) {
-      return;
+    if (!param) {
+      setReservations([]);
+    } else {
+      const abortController = new AbortController();
+      setReservationsError(null);
+      searchReservations(abortController.signal)
+        .then((response) => {
+          logger.trace({
+            file_name,
+            method_name: `${method_name}/searchReservations`,
+            message: `valid`,
+            params: `Response: ${response}`,
+          });
+          setReservations(response);
+        })
+        .catch(setReservationsError);
+      return () => abortController.abort();
     }
-    const abortController = new AbortController();
-    setReservationsError(null);
-    searchReservations(load, abortController.signal)
-      .then((response) => {
-        logger.trace({
-          file_name,
-          method_name: `${method_name}/searchReservations`,
-          message: `valid`,
-          params: `Response: ${response}`,
-        });
-        setReservations(response);
-      })
-      .catch(setReservationsError);
-    return () => abortController.abort();
   }
 
   function changeHandler({ target }) {
@@ -63,7 +67,7 @@ function SearchReservations() {
     setQuery(target.value);
   }
 
-  function submitHandler(event) {
+  function submitHandler() {
     const method_name = "submitHandler";
     logger.debug({
       file_name,
@@ -71,15 +75,21 @@ function SearchReservations() {
       message: `started ${method_name}`,
       params: `query: ${query}`,
     });
-    event.preventDefault();
-    setLoad(query);
   }
-
-  const reservationFound = !reservations.length
+  let reservationsFound = !reservations.length
     ? "No reservations found"
     : `Reservations found: ${reservations.length}`;
+  reservationsFound = !param ? (
+    ""
+  ) : (
+    <div className="d-md-flex mb-3">
+      <h4>{reservationsFound}</h4>
+    </div>
+  );
 
-  const searched = load ? load : "";
+  const searched = !param
+    ? "No search criteria"
+    : `Reservations for number: ${param}`;
 
   return (
     <main>
@@ -88,9 +98,10 @@ function SearchReservations() {
           <h1 className="text-light ml-3">Search</h1>
         </div>
         <div className="d-md-flex mb-3">
-          <h4 className="mb-0">{`Reservations for number: ${searched}`}</h4>
+          <h4 className="mb-0">{searched}</h4>
         </div>
-        <form onSubmit={submitHandler} className="mb-4">
+        {reservationsFound}
+        <form onSubmit={submitHandler} className="mb-0">
           <div className="row mb-3">
             <div className="mx-3 form-group">
               <div>
@@ -98,25 +109,31 @@ function SearchReservations() {
                   Search
                 </label>
               </div>
-              <input
-                id="mobile_number"
-                className="me-3"
-                name="mobile_number"
-                type="text"
-                placeholder="Enter a customer's phone number"
-                value={query}
-                onChange={changeHandler}
-              />
-              <button type="submit" className="btn, btn-primary">
-                Submit
-              </button>
+              <div>
+                <input
+                  id="mobile_number"
+                  className="mr-1"
+                  name="mobile_number"
+                  type="text"
+                  placeholder="Enter a customer's phone number"
+                  value={query}
+                  onChange={changeHandler}
+                />
+                <button className="btn btn-primary btn-sm" type="submit">
+                  <Link
+                    to={`/search?mobile_number=${query}`}
+                    className="text-decoration-none text-white"
+                  >
+                    Submit
+                  </Link>
+                </button>
+              </div>
             </div>
           </div>
         </form>
       </nav>
       <ErrorAlert error={reservationsError} />
       <section>
-        <h4>{reservationFound}</h4>
         <ReservationsTable reservations={reservations} />
       </section>
     </main>

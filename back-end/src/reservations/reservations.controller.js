@@ -4,6 +4,7 @@
 
 const service = require("./reservations.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
+const formatDate = require("../api");
 
 //list
 
@@ -16,7 +17,7 @@ function hasQuery(req, res, next) {
       const message =
         "A date must be given to fetch the according reservation list.";
       req.log.trace({ __filename, methodName, valid: false }, message);
-      next({
+      return next({
         status: 400,
         message: message,
       });
@@ -28,7 +29,7 @@ function hasQuery(req, res, next) {
       const message =
         "A mobile_number must be given to fetch the according reservation list.";
       req.log.trace({ __filename, methodName, valid: false }, message);
-      next({
+      return next({
         status: 400,
         message: message,
       });
@@ -68,11 +69,20 @@ async function reservationExists(req, res, next) {
   const foundReservation = await service.read(reservation_id);
   if (foundReservation) {
     res.locals.reservation = foundReservation;
-    req.log.trace({ __filename, methodName, valid: true, locals: res.locals });
+    req.log.trace({
+      __filename,
+      methodName,
+      valid: true,
+      params: req.params,
+      locals: res.locals,
+    });
     return next();
   }
   const message = `reservation_id: ${reservation_id} not found`;
-  req.log.trace({ __filename, methodName, valid: false }, message);
+  req.log.trace(
+    { __filename, methodName, valid: false, params: req.params },
+    message
+  );
   next({ status: 404, message: message });
 }
 
@@ -97,15 +107,21 @@ function hasValidDate(req, res, next) {
   //checks if reservation_date is a date
   if (Number.isNaN(Date.parse(date))) {
     const message = "reservation_date is not a date.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({ status: 400, message: message });
+    req.log.trace(
+      { __filename, methodName, valid: false, params: date, body: req.body },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   //checks if reservation_date is on a Tuesday
   if (date.getDay() == 2) {
     const message =
       "The restaurant is closed on Tuesdays, invalid reservation day.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
@@ -113,8 +129,11 @@ function hasValidDate(req, res, next) {
   //checks if reservation_date and reservation_time is in the future.
   if (Date.now() > Date.parse(date)) {
     const message = "Reservation must be made in the future.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({ status: 400, message: message });
+    req.log.trace(
+      { __filename, methodName, valid: false, params: date, body: req.body },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   req.log.trace({ __filename, methodName, valid: true });
   next();
@@ -131,14 +150,26 @@ function hasValidTime(req, res, next) {
   );
   if (!isNumber) {
     const message = "reservation_time is not a time.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({ status: 400, message: message });
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        body: req.body,
+        params: getHrsMin,
+      },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   if (reservation_time > "21:30" || reservation_time < "10:30") {
     const message =
       "Invalid time, restaurant opens at 10:30AM and allows for the last reservation at 9:30PM.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
@@ -151,10 +182,13 @@ function hasBookedStatus(req, res, next) {
   const methodName = "hasBookedStatus";
   req.log.debug({ __filename, methodName, body: req.body });
   const { status } = req.body.data;
-  if (status && status !== "booked") {
-    const message = `New reservations must be listed with 'booked' status, posted status as ${status}.`;
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({
+  if (status && status !== "Booked") {
+    const message = `New reservations must be listed with 'Booked' status, posted status as ${status}.`;
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
@@ -169,8 +203,11 @@ function hasValidPeople(req, res, next) {
   const { people } = req.body.data;
   if (!Number.isInteger(people)) {
     const message = "Property people is not a number.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({ status: 400, message: message });
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   req.log.trace({ __filename, methodName, valid: true });
   next();
@@ -183,13 +220,19 @@ function hasValidMobile(req, res, next) {
   const phone = mobile_number.replace(/[^a-zA-Z0-9]/g, "");
   if (!Number.isInteger(parseInt(phone))) {
     const message = "Mobile Number is not a phone number.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({ status: 400, message: message });
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body, params: phone },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   if (phone.length !== 10) {
     const message = "Mobile Number is not formatted correctly.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({ status: 400, message: message });
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body, params: phone },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   next();
   req.log.trace({ __filename, methodName, valid: true });
@@ -207,7 +250,16 @@ function hasProperty(property, req, res, next) {
   const { data } = req.body;
   if (!data[property]) {
     const message = `Reservation must include a ${property} property.`;
-    req.log.trace({ __filename, methodName, valid: false }, message);
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        params: property,
+        body: req.body,
+      },
+      message
+    );
     return next({
       status: 400,
       message: message,
@@ -222,8 +274,11 @@ function hasValidProperties(req, res, next) {
   req.log.debug({ __filename, methodName, body: req.body });
   if (!req.body.data) {
     const message = "body must have data property.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({ status: 400, message: message });
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   const needsProperties = [
     "first_name",
@@ -237,7 +292,6 @@ function hasValidProperties(req, res, next) {
     hasProperty(property, req, res, next);
   });
   req.log.trace({ __filename, methodName, valid: true });
-
   next();
 }
 
@@ -260,11 +314,20 @@ function reservationStatusIsNotFinished(req, res, next) {
   const methodName = "reservationStatusIsNotFinished";
   req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
   const { status } = res.locals.reservation;
-  if (status === "finished") {
+  if (status === "Finished") {
     const message =
-      "Reservation cannot be updated if it is already 'finished'.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({
+      "Reservation cannot be updated if it is already 'Finished'.";
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        body: req.body,
+        locals: res.locals,
+      },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
@@ -277,11 +340,20 @@ function reservationStatusIsNotCancelled(req, res, next) {
   const methodName = "reservationStatusIsNotCancelled";
   req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
   const { status } = res.locals.reservation;
-  if (status === "cancelled") {
+  if (status === "Cancelled") {
     const message =
-      "Reservation cannot be updated if it is already 'cancelled'.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({
+      "Reservation cannot be updated if it is already 'Cancelled'.";
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        body: req.body,
+        locals: res.locals,
+      },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
@@ -296,55 +368,85 @@ function hasValidStatus(req, res, next) {
   const { status } = req.body.data;
   if (!status) {
     const message = "Status update is undefined";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
   }
-  const validStatuses = ["booked", "seated", "finished", "cancelled"];
+  const validStatuses = ["Booked", "Sat", "Finished", "Cancelled"];
   if (validStatuses.includes(status)) {
     req.log.trace({ __filename, methodName, valid: true });
     return next();
   }
   const statusList = validStatuses.join(", ");
   const message = `Reservation status: ${status} is invalid, valid statuses are: ${statusList}.`;
-  req.log.trace({ __filename, methodName, valid: false }, message);
+  req.log.trace(
+    { __filename, methodName, valid: false, body: req.body },
+    message
+  );
   next({
     status: 400,
     message: message,
   });
 }
 
-//For seated or finished status updates, function checks that it is appropriate for the given reservation_date.
+//For Sat or Finished status updates, function checks that it is appropriate for the given reservation_date.
 function isToday(req, res, next) {
   const methodName = "isToday";
-  req.log.debug({ __filename, methodName, body: req.body });
-  const { status, reservation_date } = req.body.data;
-  if (status !== "seated" && status !== "finished") {
-    req.log.trace({ __filename, methodName, valid: true });
+  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
+  const { status } = req.body.data;
+  const { reservation_date } = res.locals.reservation;
+  if (status !== "Sat" && status !== "Finished") {
+    req.log.trace({
+      __filename,
+      methodName,
+      valid: true,
+      body: req.body,
+      locals: res.locals,
+    });
     return next();
   }
-  //Converts Date.now() to yyyy/mm/dd format
-  const todayStr = new Date(Date.now()).toString();
-  const todayArr = todayStr.split(" ");
-  todayArr.shift();
-  todayArr.splice(3, todayArr.length - 1);
-  const today = todayArr.join("/");
-  if (status === "seated") {
-    if (reservation_date !== today) {
-      const message = `Reservation can only be seated for today's date: ${today}.`;
-      req.log.trace({ __filename, methodName, valid: false }, message);
-      next({
+  //Converts Date.now() to yyyy-mm-dd
+  const today = formatDate(new Date(Date.now()));
+  const resDate = formatDate(reservation_date);
+  if (status === "Sat") {
+    if (resDate !== today) {
+      const message = `Reservation can only be sat for today's date: ${today}.`;
+      req.log.trace(
+        {
+          __filename,
+          methodName,
+          valid: false,
+          params: { today, resDate },
+          body: req.body,
+          locals: res.locals,
+        },
+        message
+      );
+      return next({
         status: 400,
         message: message,
       });
     }
   } else {
-    if (reservation_date > today) {
+    if (resDate > today) {
       const message = `Reservation can only be finished for today's date or earlier, today's date: ${today}.`;
-      req.log.trace({ __filename, methodName, valid: false }, message);
-      next({
+      req.log.trace(
+        {
+          __filename,
+          methodName,
+          valid: false,
+          params: today,
+          body: req.body,
+          locals: res.locals,
+        },
+        message
+      );
+      return next({
         status: 400,
         message: message,
       });
@@ -375,12 +477,18 @@ function hasStatusProperty(req, res, next) {
   const { data } = req.body;
   if (!data) {
     const message = "body must have data property.";
-    req.log.trace({ __filename, methodName, valid: false }, message);
-    next({ status: 400, message: message });
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
+    return next({ status: 400, message: message });
   }
   if (!data.status) {
     const message = `Reservation status update must include a status property.`;
-    req.log.trace({ __filename, methodName, valid: false }, message);
+    req.log.trace(
+      { __filename, methodName, valid: false, body: req.body },
+      message
+    );
     return next({
       status: 400,
       message: message,
@@ -393,31 +501,59 @@ function hasStatusProperty(req, res, next) {
 //Both checks status and updates locals.reservation with new status.
 function checkStatus(req, res, next) {
   const methodName = "checkStatus";
-  req.log.debug({ __filename, methodName, body: req.body });
+  req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
   const { status } = req.body.data;
   const { reservation_id, first_name, last_name } = res.locals.reservation;
-  if (status === "seat") {
-    if (res.locals.reservation.status === "seated") {
-      const message = `reservation_id: ${reservation_id}, for ${first_name} ${last_name} is already seated.`;
+  if (status === "Sat") {
+    if (res.locals.reservation.status === "Sat") {
+      const message = `reservation_id: ${reservation_id}, for ${first_name} ${last_name} is already sat.`;
+      req.log.trace(
+        {
+          __filename,
+          methodName,
+          valid: false,
+          body: req.body,
+          locals: res.locals,
+        },
+        message
+      );
       return next({ status: 400, message: message });
     }
-  } else if (status === "booked") {
+  } else if (status === "Booked") {
     const message = `Reservations cannot be created through this method.`;
-    next({
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        body: req.body,
+        locals: res.locals,
+      },
+      message
+    );
+    return next({
       status: 400,
       message: message,
     });
-    req.log.trace({ __filename, methodName, valid: false }, message);
-  } else if (status === "cancelled") {
-    if (res.locals.reservation.status !== "booked") {
-      //Finished or cancelled reservations should give errors in prior functions, so not present in message.
+  } else if (status === "Cancelled") {
+    if (res.locals.reservation.status !== "Booked") {
+      //Finished or Cancelled reservations should give errors in prior functions, so not present in message.
       const message =
-        "Reservations cannot be cancelled through this method if they are already seated, seated reservations need to be cancelled through 'edit'.";
-      next({
+        "Reservations cannot be cancelled unless they have the 'Booked' status.";
+      req.log.trace(
+        {
+          __filename,
+          methodName,
+          valid: false,
+          body: req.body,
+          locals: res.locals,
+        },
+        message
+      );
+      return next({
         status: 400,
         message: message,
       });
-      req.log.trace({ __filename, methodName, valid: false }, message);
     }
   }
 
@@ -437,6 +573,20 @@ async function updateStatus(req, res) {
     return: true,
     data: updatedReservation[0],
   });
+}
+
+async function updateStatusThenTables(req, res, next) {
+  const methodName = "updateStatus";
+  req.log.debug({ __filename, methodName, locals: res.locals });
+  const updatedReservation = await service.update(res.locals.reservation);
+  res.locals.reservationResponse = { data: updatedReservation[0] };
+  req.log.trace({
+    __filename,
+    methodName,
+    return: true,
+    data: updatedReservation[0],
+  });
+  next();
 }
 
 module.exports = {
@@ -473,6 +623,16 @@ module.exports = {
     isToday,
     checkStatus,
     asyncErrorBoundary(updateStatus),
+  ],
+  updateStatusThenTables: [
+    asyncErrorBoundary(reservationExists),
+    hasStatusProperty,
+    reservationStatusIsNotFinished,
+    reservationStatusIsNotCancelled,
+    hasValidStatus,
+    isToday,
+    checkStatus,
+    asyncErrorBoundary(updateStatusThenTables),
   ],
   reservationExists,
 };

@@ -20,7 +20,7 @@ function BodyWOFinish({ columns, tables }) {
   });
 
   const tableRows = tables.map((table) => {
-    const availability = table.reservation_id ? "occupied" : "free";
+    const availability = table.reservation_id ? "Occupied" : "Free";
     let tData = "";
     return (
       <tr key={table.table_id}>

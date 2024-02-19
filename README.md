@@ -76,7 +76,7 @@ You can use the screenshots to debug your code by rendering additional informati
     - Mobile Number
     - Reservation Date and Time
     - People (party size)
-    - Status (booked, seated, finished, cancelled)
+    - Status (Booked, Sat, Finished, Cancelled)
     - Actions to:
       - Seat
       - Edit
@@ -90,6 +90,8 @@ You can use the screenshots to debug your code by rendering additional informati
 
     - To edit, seat, or cancel a reservation; go to the date of the reservation in the dashboard or Search for it and click the relevant button.
 
+    - To go to a date for it's list of reservations, you can either navigate through the previous day, today, or next day buttons on the dashboard or by entering the date in a query string in the URL through the following format: (domain name).com/dashboard?date=yyyy-mm-dd.
+
   - Each table includes sections for:
 
     - Table ID (generated automatically)
@@ -102,13 +104,15 @@ You can use the screenshots to debug your code by rendering additional informati
 
     - To create a table, click New Table on the sidebar.
 
-    - To go to a date you can either navigate through the previous day, today, or next day buttons on the dashboard or by entering the date in a query string in the URL through the following format: (domain name).com/dashboard?date=yyyy-mm-dd.
+    - To finish a table, go to the dashboard and click the 'Finish' button.
+
+    - You can finish a table from any date on the dashboard.
 
 ## Improvements and Future
 
 - Add a calendar to the dashboard that allows people to navigate dates more easily.
 - Add the ability to delete and edit tables.
-- Add the ability to map tables to a floor plan.
+- Add the ability to seat, finish, or cancel a reservation from edit reservation.
 
 ## Technologies Used
 

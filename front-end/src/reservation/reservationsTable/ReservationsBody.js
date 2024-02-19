@@ -1,7 +1,5 @@
-import React, { useState } from "react";
-import { Link, useHistory } from "react-router-dom/cjs/react-router-dom.min";
-import { cancelReservation } from "../../utils/api";
-import ErrorAlert from "../../layout/ErrorAlert";
+import React from "react";
+import { Link } from "react-router-dom/cjs/react-router-dom.min";
 import logger from "../../utils/logger";
 import { today } from "../../utils/date-time";
 
@@ -11,10 +9,12 @@ import { today } from "../../utils/date-time";
  *  an array of reservations for which the user wants to view.
  *  @param columns
  *  the labels and accessors for the columns of the reservations table.
+ *  @param cancelHandler
+ *  the function that handles cancelling a reservation.
  * @returns {JSX.Element}
  */
 
-function ReservationsBody({ reservations, columns }) {
+function ReservationsBody({ reservations, columns, cancelHandler }) {
   const file_name = "ReservationsBody";
   logger.info({
     file_name,
@@ -23,40 +23,9 @@ function ReservationsBody({ reservations, columns }) {
     params: `reservations: ${reservations}, columns: ${columns}`,
   });
 
-  //Was going to adjust so that the reservation could only be seated if it was for today's date, but caused tests to fail.
-
-  const [error, setError] = useState(null);
-  const history = useHistory();
+  //Was going to adjust so that the reservation could only be sat if it was for today's date, but caused tests to fail.
 
   if (reservations && reservations.length) {
-    function cancelHandler({ target }) {
-      const method_name = "cancelHandler";
-      logger.debug({
-        file_name,
-        method_name,
-        message: `started ${method_name}`,
-      });
-
-      if (window.confirm("Do you want to cancel this reservation?")) {
-        const abortController = new AbortController();
-        setError(null);
-        cancelReservation(target.value, abortController.signal)
-          .then((response) => {
-            logger.trace({
-              file_name,
-              method_name: `${method_name}/cancelReservation`,
-              message: `valid`,
-              params: `Response: ${response}`,
-            });
-            history.goBack();
-          })
-          .catch((err) => {
-            setError(err);
-          });
-        return () => abortController.abort();
-      }
-    }
-
     const tableRows = reservations.map((reservation) => {
       const addSeat = (
         <td key="seat" data-reservation-id-status={reservation.reservation_id}>
@@ -85,6 +54,13 @@ function ReservationsBody({ reservations, columns }) {
           </Link>
         </td>
       );
+      const addNoEdit = (
+        <td key="edit" data-reservation-id-status={reservation.reservation_id}>
+          <button className="btn btn-info" disabled>
+            Edit
+          </button>
+        </td>
+      );
       const addCancel = (
         <td
           key="cancel"
@@ -100,6 +76,16 @@ function ReservationsBody({ reservations, columns }) {
           </button>
         </td>
       );
+      const addNoCancel = (
+        <td
+          key="cancel"
+          data-reservation-id-status={reservation.reservation_id}
+        >
+          <button className="btn btn-danger" disabled>
+            Cancel
+          </button>
+        </td>
+      );
       let tData = "";
       return (
         <tr key={reservation.reservation_id}>
@@ -107,14 +93,23 @@ function ReservationsBody({ reservations, columns }) {
             if (accessor === "seat") {
               if (
                 reservation.reservation_date !== today() ||
-                reservation.status !== "booked"
+                reservation.status !== "Booked"
               ) {
                 return addNoSeat;
               }
               return addSeat;
             } else if (accessor === "edit") {
+              if (
+                reservation.status === "Finished" ||
+                reservation.status === "Cancelled"
+              ) {
+                return addNoEdit;
+              }
               return addEdit;
             } else if (accessor === "cancel_reservation") {
+              if (reservation.status !== "Booked") {
+                return addNoCancel;
+              }
               return addCancel;
             } else {
               tData = reservation[accessor] ? reservation[accessor] : "——";
@@ -126,7 +121,6 @@ function ReservationsBody({ reservations, columns }) {
     });
     return (
       <>
-        <ErrorAlert error={error} />
         <tbody>{tableRows}</tbody>
       </>
     );

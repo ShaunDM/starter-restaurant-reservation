@@ -208,7 +208,7 @@ describe("US-04 - Seat reservation", () => {
 
       test("returns 400 if reservation_id is missing", async () => {
         expect(tableOne).not.toBeUndefined();
-        const data = { status: "seated" };
+        const data = { status: "Sat" };
 
         const response = await request(app)
           .put(`/tables/${tableOne.table_id}/seat`)
@@ -237,7 +237,7 @@ describe("US-04 - Seat reservation", () => {
       test("returns 404 if reservation_id does not exist", async () => {
         expect(tableOne).not.toBeUndefined();
         const reservation_id = 999;
-        const data = { status: "seated" };
+        const data = { status: "Sat" };
 
         const response = await request(app)
           .put(
@@ -258,7 +258,7 @@ describe("US-04 - Seat reservation", () => {
             `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
-          .send({ data: { status: "seated" } });
+          .send({ data: { status: "Sat" } });
 
         expect(response.body.error).toBeUndefined();
         expect(response.status).toBe(200);
@@ -271,7 +271,7 @@ describe("US-04 - Seat reservation", () => {
             `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
-          .send({ data: { status: "seated" } });
+          .send({ data: { status: "Sat" } });
 
         expect(response.body.error).toContain("capacity");
         expect(response.status).toBe(400);
@@ -286,7 +286,7 @@ describe("US-04 - Seat reservation", () => {
             `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
-          .send({ data: { status: "seated" } });
+          .send({ data: { status: "Sat" } });
 
         expect(occupyResponse.body.error).toBeUndefined();
         expect(occupyResponse.status).toBe(200);
@@ -295,7 +295,7 @@ describe("US-04 - Seat reservation", () => {
         const doubleAssignResponse = await request(app)
           .put(`reservations/2/tables/${tableOne.table_id}/seat`)
           .set("Accept", "application/json")
-          .send({ data: { status: "seated" } });
+          .send({ data: { status: "Sat" } });
 
         expect(doubleAssignResponse.body.error).toContain("occupied");
         expect(doubleAssignResponse.status).toBe(400);

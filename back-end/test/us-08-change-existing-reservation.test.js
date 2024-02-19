@@ -354,14 +354,14 @@ describe("US-08 - Change an existing reservation", () => {
   });
 
   describe("PUT /reservations/:reservation_id/cancel", () => {
-    test("returns 200 for status cancelled", async () => {
+    test("returns 200 for status Cancelled", async () => {
       const reservation = await knex("reservations")
         .orderBy(["reservation_date", "reservation_time"])
         .first();
 
       expect(reservation).not.toBeUndefined();
 
-      const status = "cancelled";
+      const status = "Cancelled";
 
       const response = await request(app)
         .put(`/reservations/${reservation.reservation_id}/cancel`)

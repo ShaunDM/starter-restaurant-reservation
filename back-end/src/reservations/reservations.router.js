@@ -28,8 +28,7 @@ router.use(
 
 router.use(
   "/:reservation_id/tables",
-  corsPut,
-  controller.updateStatus,
+  controller.updateStatusThenTables,
   tablesRouter
 );
 

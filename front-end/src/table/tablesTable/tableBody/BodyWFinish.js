@@ -22,7 +22,7 @@ function BodyWFinish({ columns, tables, handleFinish }) {
   });
 
   const tableRows = tables.map((table) => {
-    const availability = table.reservation_id ? "occupied" : "free";
+    const availability = table.reservation_id ? "Occupied" : "Free";
     const finishButton = table.reservation_id ? (
       <button
         type="button"

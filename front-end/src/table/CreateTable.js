@@ -100,7 +100,7 @@ function CreateTable() {
               name="table_name"
               type="text"
               placeholder="Must be at least 2 characters"
-              minlength="2"
+              minLength="2"
               value={table.table_name}
               onChange={changeHandler}
               required={true}

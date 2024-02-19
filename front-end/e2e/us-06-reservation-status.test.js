@@ -1,5 +1,5 @@
 const puppeteer = require("puppeteer");
-const { setDefaultOptions } = require('expect-puppeteer');
+const { setDefaultOptions } = require("expect-puppeteer");
 const fs = require("fs");
 const fsPromises = fs.promises;
 
@@ -64,15 +64,15 @@ describe("US-06 - Reservation status - E2E", () => {
       const containsBooked = await containsText(
         page,
         `[data-reservation-id-status="${reservation.reservation_id}"]`,
-        "booked"
+        "Booked"
       );
 
       expect(containsBooked).toBe(true);
     });
 
-    test("Seating the reservation changes status to 'seated' and hides Seat button", async () => {
+    test("Seating the reservation changes status to 'Sat' and hides Seat button", async () => {
       await page.screenshot({
-        path: ".screenshots/us-06-seated-before.png",
+        path: ".screenshots/us-06-Sat-before.png",
         fullPage: true,
       });
 
@@ -81,14 +81,14 @@ describe("US-06 - Reservation status - E2E", () => {
       await page.reload({ waitUntil: "networkidle0" });
 
       await page.screenshot({
-        path: ".screenshots/us-06-seated-after.png",
+        path: ".screenshots/us-06-Sat-after.png",
         fullPage: true,
       });
 
       const containsSeated = await containsText(
         page,
         `[data-reservation-id-status="${reservation.reservation_id}"]`,
-        "seated"
+        "Sat"
       );
 
       expect(containsSeated).toBe(true);

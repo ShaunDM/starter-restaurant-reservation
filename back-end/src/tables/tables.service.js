@@ -22,11 +22,11 @@ async function create(newTable) {
     .then((createdTables) => createdTables[0]);
 }
 
-async function update(table, reservation_id) {
+async function update(table) {
   return knex("tables")
     .where({ table_id: table.table_id })
     .first()
-    .update({ ...table, reservation_id });
+    .update(table);
 }
 
 module.exports = {

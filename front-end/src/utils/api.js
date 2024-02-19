@@ -111,7 +111,7 @@ export async function seatTable(seat, signal) {
   const url = `${API_BASE_URL}/reservations/${seat.reservation_id}/tables/${seat.table_id}/seat`;
   const options = {
     method: "PUT",
-    body: JSON.stringify({ data: { status: "seated" } }),
+    body: JSON.stringify({ data: { status: "Sat" } }),
     headers,
     signal,
   };
@@ -122,7 +122,7 @@ export async function finishTable(finish, signal) {
   const url = `${API_BASE_URL}/reservations/${finish.reservation_id}/tables/${finish.table_id}/finish`;
   const options = {
     method: "PUT",
-    body: JSON.stringify({ data: { status: "finished" } }),
+    body: JSON.stringify({ data: { status: "Finished" } }),
     headers,
     signal,
   };
@@ -134,14 +134,14 @@ export async function cancelReservation(reservation_id, signal) {
   const options = {
     method: "PUT",
     headers,
-    body: JSON.stringify({ data: { status: "cancelled" } }),
+    body: JSON.stringify({ data: { status: "Cancelled" } }),
     signal,
   };
   return await fetchJson(url, options);
 }
 
-export async function searchReservations(query, signal) {
-  const url = `${API_BASE_URL}/reservations?mobile_number=${query}`;
+export async function searchReservations(signal) {
+  const url = `${API_BASE_URL}/reservations${window.location.search}`;
   return await fetchJson(url, { headers, signal }, [])
     .then(formatReservationDate)
     .then(formatReservationTime);
@@ -149,7 +149,7 @@ export async function searchReservations(query, signal) {
 
 export async function updateReservation(updatedReservation, signal) {
   const { reservation_id } = updatedReservation;
-  const url = `${API_BASE_URL}/reservations/${reservation_id}`;
+  const url = `${API_BASE_URL}/reservations/${reservation_id}/edit`;
   const options = {
     method: "PUT",
     headers,

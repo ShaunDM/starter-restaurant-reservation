@@ -272,7 +272,7 @@ so that I know which tables are occupied and free.
 1. The `/tables/new` page will
    - have the following required and not-nullable fields:
      - Table name: `<input name="table_name" />`, which must be at least 2 characters long.
-     - Capacity: `<input name="capacity" />`, this is the number of people that can be seated at the table, which must be at least 1 person.
+     - Capacity: `<input name="capacity" />`, this is the number of people that can be sat at the table, which must be at least 1 person.
    - display a `Submit` button that, when clicked, saves the new table then displays the `/dashboard` page
    - display a `Cancel` button that, when clicked, returns the user to the previous page
 1. The `/dashboard` page will:
@@ -282,7 +282,7 @@ so that I know which tables are occupied and free.
      - Display a "Seat" button on each reservation.
      - The "Seat" button must be a link with an `href` attribute that equals `/reservations/${reservation_id}/seat`, so it can be found by the tests.
    - display a list of all tables, sorted by `table_name`, in another area of the dashboard
-     - Each table will display "Free" or "Occupied" depending on whether a reservation is seated at the table.
+     - Each table will display "Free" or "Occupied" depending on whether a reservation is sat at the table.
      - The "Free" or "Occupied" text must have a `data-table-id-status=${table.table_id}` attribute, so it can be found by the tests.
 
 1. The `/reservations/:reservation_id/seat` page will
@@ -290,7 +290,7 @@ so that I know which tables are occupied and free.
      - Table number: `<select name="table_id" />`. The text of each option must be `{table.table_name} - {table.capacity}` so the tests can find the options.
    - do not seat a reservation with more people than the capacity of the table
    - display a `Submit` button that, when clicked, assigns the table to the reservation then displays the `/dashboard` page
-   - PUT to `/tables/:table_id/seat/` in order to save the table assignment. The body of the request must be `{ data: { reservation_id: x } }` where X is the reservation_id of the reservation being seated. The tests do not check the body returned by this request.
+   - PUT to `/tables/:table_id/seat/` in order to save the table assignment. The body of the request must be `{ data: { reservation_id: x } }` where X is the reservation_id of the reservation being sat. The tests do not check the body returned by this request.
    - display a `Cancel` button that, when clicked, returns the user to the previous page
 1. The `tables` table must be seeded with the following data:
    - `Bar #1` & `Bar #2`, each with a capacity of 1.
@@ -325,18 +325,18 @@ so that I can seat new guests at that table.<br/>
 ### US-06 Reservation Status
 
 As a restaurant manager<br/>
-I want a reservation to have a status of either booked, seated, or finished<br/>
-so that I can see which reservation parties are seated, and finished reservations are hidden from the dashboard.
+I want a reservation to have a status of either Booked, Sat, or Finished<br/>
+so that I can see which reservation parties are Sat, and Finished reservations are hidden from the dashboard.
 
 #### Acceptance Criteria
 
 1. The `/dashboard` page will
-   - display the status of the reservation. The default status is "booked"
+   - display the status of the reservation. The default status is "Booked"
      - the status text must have a `data-reservation-id-status={reservation.reservation_id}` attribute, so it can be found by the tests.
-   - display the Seat button only when the reservation status is "booked".
-   - clicking the Seat button changes the status to "seated" and hides the Seat button.
-   - clicking the Finish button associated with the table changes the reservation status to "finished" and removes the reservation from the dashboard.
-   - to set the status, PUT to `/reservations/:reservation_id/status` with a body of `{data: { status: "<new-status>" } }` where `<new-status>` is one of booked, seated, or finished. Please note that this is only tested in the back-end for now.
+   - display the Seat button only when the reservation status is "Booked".
+   - clicking the Seat button changes the status to "Sat" and hides the Seat button.
+   - clicking the Finish button associated with the table changes the reservation status to "Finished" and removes the reservation from the dashboard.
+   - to set the status, PUT to `/reservations/:reservation_id/status` with a body of `{data: { status: "<new-status>" } }` where `<new-status>` is one of Booked, Sat, or Finished. Please note that this is only tested in the back-end for now.
 
 > **Hint** You can add a field to a table in a migration `up` method by defining a new column. E.g. `table.string("last_name", null).notNullable();` will create a new last_name column. Be sure to remove the column in the `down` function using `dropColumn()`. E.g. `table.dropColumn("last_name");`
 
@@ -389,11 +389,11 @@ so that reservations are accurate and current.
    - Display a "Cancel" button next to each reservation
    - The Cancel button must have a `data-reservation-id-cancel={reservation.reservation_id}` attribute, so it can be found by the tests.
    - Clicking the "Cancel" button will display the following confirmation: "Do you want to cancel this reservation? This cannot be undone."
-     - Clicking "Ok" on the confirmation dialog, sets the reservation status to `cancelled`, and the results on the page are refreshed.
-       - set the status of the reservation to `cancelled` using a PUT to `/reservations/:reservation_id/status` with a body of `{data: { status: "cancelled" } }`.
+     - Clicking "Ok" on the confirmation dialog, sets the reservation status to `Cancelled`, and the results on the page are refreshed.
+       - set the status of the reservation to `Cancelled` using a PUT to `/reservations/:reservation_id/status` with a body of `{data: { status: "Cancelled" } }`.
      - Clicking "Cancel" on the confirmation dialog makes no changes.
 1. The `/reservations/:reservation_id/edit` page will display the reservation form with the existing reservation data filled in
-   - Only reservations with a status of "booked" can be edited.
+   - Only reservations with a status of "Booked" can be edited.
    - Clicking the "Submit" button will save the reservation, then displays the previous page.
    - Clicking "Cancel" makes no changes, then display the previous page.
 

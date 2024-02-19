@@ -103,7 +103,7 @@ function DashboardOld({ date }) {
       setError(null);
       readReservation(target.value, abortController.signal).then((result) =>
         changeReservationStatus(
-          { ...result, status: "cancelled" },
+          { ...result, status: "Cancelled" },
           abortController.signal
         )
           .then((response) => {
@@ -140,7 +140,7 @@ function DashboardOld({ date }) {
     </tr>
   ) : (
     reservations.map((reservation) => {
-      if (reservation.status === "seated") {
+      if (reservation.status === "Sat") {
         return (
           <tr key={reservation.reservation_id}>
             <td>{reservation.reservation_id}</td>
