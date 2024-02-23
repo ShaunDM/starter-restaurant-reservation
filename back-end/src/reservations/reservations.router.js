@@ -28,8 +28,9 @@ router.use(
 
 router.use(
   "/:reservation_id/tables",
-  controller.updateStatusThenTables,
-  tablesRouter
+  controller.checkStatusThenTables,
+  tablesRouter,
+  controller.updateStatusWTables
 );
 
 router

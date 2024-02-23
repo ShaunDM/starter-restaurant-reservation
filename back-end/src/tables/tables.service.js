@@ -26,7 +26,9 @@ async function update(table) {
   return knex("tables")
     .where({ table_id: table.table_id })
     .first()
-    .update(table);
+    .update(table)
+    .returning("*")
+    .then((updatedRecords) => updatedRecords[0]);
 }
 
 module.exports = {

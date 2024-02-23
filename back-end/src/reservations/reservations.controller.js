@@ -4,7 +4,7 @@
 
 const service = require("./reservations.service");
 const asyncErrorBoundary = require("../errors/asyncErrorBoundary");
-const formatDate = require("../api");
+const api = require("../api");
 
 //list
 
@@ -411,8 +411,8 @@ function isToday(req, res, next) {
     return next();
   }
   //Converts Date.now() to yyyy-mm-dd
-  const today = formatDate(new Date(Date.now()));
-  const resDate = formatDate(reservation_date);
+  const today = api.today();
+  const resDate = api.formatDate(reservation_date);
   if (status === "Sat") {
     if (resDate !== today) {
       const message = `Reservation can only be sat for today's date: ${today}.`;
@@ -464,9 +464,9 @@ async function update(req, res) {
     __filename,
     methodName,
     return: true,
-    data: updatedReservation[0],
+    data: updatedReservation,
   });
-  res.status(200).json({ data: updatedReservation[0] });
+  res.status(200).json({ data: updatedReservation });
 }
 
 //update reservation status
@@ -504,21 +504,19 @@ function checkStatus(req, res, next) {
   req.log.debug({ __filename, methodName, body: req.body, locals: res.locals });
   const { status } = req.body.data;
   const { reservation_id, first_name, last_name } = res.locals.reservation;
-  if (status === "Sat") {
-    if (res.locals.reservation.status === "Sat") {
-      const message = `reservation_id: ${reservation_id}, for ${first_name} ${last_name} is already sat.`;
-      req.log.trace(
-        {
-          __filename,
-          methodName,
-          valid: false,
-          body: req.body,
-          locals: res.locals,
-        },
-        message
-      );
-      return next({ status: 400, message: message });
-    }
+  if (status === "Sat" && res.locals.reservation.status === "Sat") {
+    const message = `reservation_id: ${reservation_id}, for ${first_name} ${last_name} is already sat.`;
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        body: req.body,
+        locals: res.locals,
+      },
+      message
+    );
+    return next({ status: 400, message: message });
   } else if (status === "Booked") {
     const message = `Reservations cannot be created through this method.`;
     req.log.trace(
@@ -535,30 +533,50 @@ function checkStatus(req, res, next) {
       status: 400,
       message: message,
     });
-  } else if (status === "Cancelled") {
-    if (res.locals.reservation.status !== "Booked") {
-      //Finished or Cancelled reservations should give errors in prior functions, so not present in message.
-      const message =
-        "Reservations cannot be cancelled unless they have the 'Booked' status.";
-      req.log.trace(
-        {
-          __filename,
-          methodName,
-          valid: false,
-          body: req.body,
-          locals: res.locals,
-        },
-        message
-      );
-      return next({
-        status: 400,
-        message: message,
-      });
-    }
+  } else if (
+    status === "Cancelled" &&
+    res.locals.reservation.status !== "Booked"
+  ) {
+    //Finished or Cancelled reservations should give errors in prior functions, so not present in message.
+    const message =
+      "Reservations cannot be cancelled unless they have the 'Booked' status.";
+    req.log.trace(
+      {
+        __filename,
+        methodName,
+        valid: false,
+        body: req.body,
+        locals: res.locals,
+      },
+      message
+    );
+    return next({
+      status: 400,
+      message: message,
+    });
   }
-
   req.log.trace({ __filename, methodName, valid: true });
   res.locals.reservation.status = status;
+  next();
+}
+
+//even though tables router is using these parameters, have to put it here or it routes improperly to tables router. I could base tables router off of request data or the reservation status update off of URL rather than request data to remove this discrepency, but I like having the status update in the URL and reworking reservations would take a larger investment than I'm willing to put in for this project.
+
+function urlHasValidPath(req, res, next) {
+  const methodName = "urlHasValidPath";
+  req.log.debug({ __filename, methodName, path: req.path });
+  if (!req.path.endsWith("seat") && !req.path.endsWith("finish")) {
+    const message = `URL: ${req.originalUrl} has invalid path: ${req.path}, valid paths end with 'seat' or 'finish'.`;
+    req.log.trace(
+      { __filename, methodName, valid: false, path: req.path },
+      message
+    );
+    return next({
+      status: 404,
+      message: message,
+    });
+  }
+  req.log.trace({ __filename, methodName, valid: true });
   next();
 }
 
@@ -566,27 +584,31 @@ async function updateStatus(req, res) {
   const methodName = "updateStatus";
   req.log.debug({ __filename, methodName, locals: res.locals });
   const updatedReservation = await service.update(res.locals.reservation);
-  res.status(200).json({ data: updatedReservation[0] });
+  res.status(200).json({ data: updatedReservation });
   req.log.trace({
     __filename,
     methodName,
     return: true,
-    data: updatedReservation[0],
+    data: updatedReservation,
   });
 }
 
-async function updateStatusThenTables(req, res, next) {
-  const methodName = "updateStatus";
+async function updateStatusWTables(req, res) {
+  const methodName = "updateStatusWTables";
   req.log.debug({ __filename, methodName, locals: res.locals });
-  const updatedReservation = await service.update(res.locals.reservation);
-  res.locals.reservationResponse = { data: updatedReservation[0] };
+  const data = {
+    reservation: await service.update(res.locals.reservation),
+    table: res.locals.tableResponse,
+  };
+
+  res.status(200).json({ data });
   req.log.trace({
     __filename,
     methodName,
     return: true,
-    data: updatedReservation[0],
+    locals: res.locals,
+    data,
   });
-  next();
 }
 
 module.exports = {
@@ -624,7 +646,7 @@ module.exports = {
     checkStatus,
     asyncErrorBoundary(updateStatus),
   ],
-  updateStatusThenTables: [
+  checkStatusThenTables: [
     asyncErrorBoundary(reservationExists),
     hasStatusProperty,
     reservationStatusIsNotFinished,
@@ -632,7 +654,8 @@ module.exports = {
     hasValidStatus,
     isToday,
     checkStatus,
-    asyncErrorBoundary(updateStatusThenTables),
+    urlHasValidPath,
   ],
   reservationExists,
+  updateStatusWTables: asyncErrorBoundary(updateStatusWTables),
 };

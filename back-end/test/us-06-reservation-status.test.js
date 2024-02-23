@@ -2,6 +2,7 @@ const request = require("supertest");
 
 const app = require("../src/app");
 const knex = require("../src/db/connection");
+const api = require("../src/api");
 
 describe("US-06 - Reservation status", () => {
   beforeAll(() => {
@@ -25,10 +26,9 @@ describe("US-06 - Reservation status", () => {
         first_name: "first",
         last_name: "last",
         mobile_number: "800-555-1212",
-        reservation_date: "2025-01-01",
+        reservation_date: api.today(),
         reservation_time: "17:30",
         people: 2,
-        status: "Booked",
       };
 
       const response = await request(app)
@@ -43,6 +43,7 @@ describe("US-06 - Reservation status", () => {
           last_name: "last",
           mobile_number: "800-555-1212",
           people: 2,
+          status: "Booked",
         })
       );
       expect(response.status).toBe(201);
@@ -55,7 +56,7 @@ describe("US-06 - Reservation status", () => {
           first_name: "first",
           last_name: "last",
           mobile_number: "800-555-1212",
-          reservation_date: "2025-01-01",
+          reservation_date: api.today(),
           reservation_time: "17:30",
           people: 2,
           status,
@@ -72,32 +73,44 @@ describe("US-06 - Reservation status", () => {
     );
   });
 
-  describe("PUT /reservations/:reservation_id/status", () => {
+  describe("PUT /reservations/:reservation_id/tables/:table_id/seat", () => {
     let reservationOne;
     let reservationTwo;
+    let tableOne;
+
+    const data = {
+      first_name: "first",
+      last_name: "last",
+      mobile_number: "800-555-1212",
+      reservation_date: api.today(),
+      reservation_time: "17:30",
+      people: 2,
+    };
 
     beforeEach(async () => {
-      [reservationOne, reservationTwo] = await knex("reservations").orderBy([
-        "reservation_date",
-        "reservation_time",
-      ]);
-    });
-
-    test("returns 404 for non-existent reservation_id", async () => {
-      const response = await request(app)
-        .put("/reservations/99/status")
+      await request(app)
+        .post("/reservations/new")
         .set("Accept", "application/json")
-        .send({ data: { status: "Sat" } });
+        .send({ data });
 
-      expect(response.body.error).toContain("99");
-      expect(response.status).toBe(404);
+      await request(app)
+        .post("/reservations/new")
+        .set("Accept", "application/json")
+        .send({ data: { ...data, reservation_time: "18:30" } });
+
+      [reservationOne, reservationTwo] = await knex("reservations")
+        .where("reservation_date", data.reservation_date)
+        .orderBy(["reservation_date", "reservation_time"]);
+      tableOne = await knex("tables").where("table_name", "#1").first();
     });
 
     test("returns 400 for unknown status", async () => {
       expect(reservationOne).not.toBeUndefined();
 
       const response = await request(app)
-        .put(`/reservations/${reservationOne.reservation_id}/status`)
+        .put(
+          `/reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+        )
         .set("Accept", "application/json")
         .send({ data: { status: "unknown" } });
 
@@ -114,37 +127,39 @@ describe("US-06 - Reservation status", () => {
         .update(reservationOne, "*");
 
       const response = await request(app)
-        .put(`/reservations/${reservationOne.reservation_id}/status`)
+        .put(
+          `/reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+        )
         .set("Accept", "application/json")
         .send({ data: { status: "Sat" } });
 
-      expect(response.body.error).toContain("finished");
+      expect(response.body.error).toContain("Finished");
       expect(response.status).toBe(400);
     });
-
-    test.each(["Booked", "Sat", "Finished"])(
-      "returns 200 for status '%s'",
-      async (status) => {
-        expect(reservationOne).not.toBeUndefined();
-
-        const response = await request(app)
-          .put(`/reservations/${reservationOne.reservation_id}/status`)
-          .set("Accept", "application/json")
-          .send({ data: { status } });
-
-        expect(response.body.data).toHaveProperty("status", status);
-        expect(response.status).toBe(200);
-      }
-    );
   });
 
-  describe("PUT /tables/:table_id/seat", () => {
+  describe("PUT /reservations/:reservation_id/tables/:table_id/seat", () => {
     let reservationOne;
     let tableOne;
     let tableTwo;
 
+    const data = {
+      first_name: "first",
+      last_name: "last",
+      mobile_number: "800-555-1212",
+      reservation_date: api.today(),
+      reservation_time: "17:30",
+      people: 2,
+    };
+
     beforeEach(async () => {
+      await request(app)
+        .post("/reservations/new")
+        .set("Accept", "application/json")
+        .send({ data });
+
       reservationOne = await knex("reservations")
+        .where("reservation_date", data.reservation_date)
         .orderBy(["reservation_date", "reservation_time"])
         .first();
       [tableOne, tableTwo] = await knex("tables").orderBy("table_name");
@@ -156,7 +171,7 @@ describe("US-06 - Reservation status", () => {
 
       const seatResponse = await request(app)
         .put(
-          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+          `/reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
         )
         .set("Accept", "application/json")
         .send({ data: { status: "Sat" } });
@@ -179,7 +194,7 @@ describe("US-06 - Reservation status", () => {
 
       const firstSeatResponse = await request(app)
         .put(
-          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+          `/reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
         )
         .set("Accept", "application/json")
         .send({ data: { status: "Sat" } });
@@ -189,7 +204,7 @@ describe("US-06 - Reservation status", () => {
 
       const secondSeatResponse = await request(app)
         .put(
-          `reservations/${reservationOne.reservation_id}/tables/${tableTwo.table_id}/seat`
+          `/reservations/${reservationOne.reservation_id}/tables/${tableTwo.table_id}/seat`
         )
         .set("Accept", "application/json")
         .send({ data: { status: "Sat" } });
@@ -199,12 +214,26 @@ describe("US-06 - Reservation status", () => {
     });
   });
 
-  describe("PUT reservations/:reservation_id/tables/:table_id/finish", () => {
+  describe("PUT /reservations/:reservation_id/tables/:table_id/finish", () => {
     let reservationOne;
     let tableOne;
+    const data = {
+      first_name: "first",
+      last_name: "last",
+      mobile_number: "800-555-1212",
+      reservation_date: api.today(),
+      reservation_time: "17:30",
+      people: 2,
+    };
 
     beforeEach(async () => {
+      await request(app)
+        .post("/reservations/new")
+        .set("Accept", "application/json")
+        .send({ data });
+
       reservationOne = await knex("reservations")
+        .where("reservation_date", data.reservation_date)
         .orderBy(["reservation_date", "reservation_time"])
         .first();
       tableOne = await knex("tables").orderBy("table_name").first();
@@ -216,7 +245,7 @@ describe("US-06 - Reservation status", () => {
 
       const seatResponse = await request(app)
         .put(
-          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+          `/reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
         )
         .set("Accept", "application/json")
         .send({ data: { status: "Sat" } });
@@ -226,7 +255,7 @@ describe("US-06 - Reservation status", () => {
 
       const finishResponse = await request(app)
         .put(
-          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/finish`
+          `/reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/finish`
         )
         .set("Accept", "application/json")
         .send({ data: { status: "Finished" } });
@@ -249,10 +278,23 @@ describe("US-06 - Reservation status", () => {
 
   describe("GET /reservations/date=XXXX-XX-XX", () => {
     let reservationOne;
-    let tableOne;
+    const data = {
+      first_name: "first",
+      last_name: "last",
+      mobile_number: "800-555-1212",
+      reservation_date: api.today(),
+      reservation_time: "17:30",
+      people: 2,
+    };
 
     beforeEach(async () => {
+      await request(app)
+        .post("/reservations/new")
+        .set("Accept", "application/json")
+        .send({ data });
+
       reservationOne = await knex("reservations")
+        .where("reservation_date", data.reservation_date)
         .orderBy(["reservation_date", "reservation_time"])
         .first();
       tableOne = await knex("tables").orderBy("table_name").first();
@@ -264,7 +306,7 @@ describe("US-06 - Reservation status", () => {
 
       const seatResponse = await request(app)
         .put(
-          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
+          `/reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/seat`
         )
         .set("Accept", "application/json")
         .send({ data: { status: "Sat" } });
@@ -274,7 +316,7 @@ describe("US-06 - Reservation status", () => {
 
       const finishResponse = await request(app)
         .put(
-          `reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/finish`
+          `/reservations/${reservationOne.reservation_id}/tables/${tableOne.table_id}/finish`
         )
         .set("Accept", "application/json")
         .send({ data: { status: "Finished" } });
@@ -284,7 +326,9 @@ describe("US-06 - Reservation status", () => {
 
       const reservationsResponse = await request(app)
         .get(
-          `/reservations?date=${asDateString(reservationOne.reservation_date)}`
+          `/reservations?date=${api.formatDate(
+            reservationOne.reservation_date
+          )}`
         )
         .set("Accept", "application/json");
 
@@ -298,9 +342,3 @@ describe("US-06 - Reservation status", () => {
     });
   });
 });
-
-function asDateString(date) {
-  return `${date.getFullYear().toString(10)}-${(date.getMonth() + 1)
-    .toString(10)
-    .padStart(2, "0")}-${date.getDate().toString(10).padStart(2, "0")}`;
-}
