@@ -35,7 +35,7 @@ describe("US-02 - Create reservation on a future, working date - E2E", () => {
     beforeEach(async () => {
       await page.type("input[name=first_name]", "John");
       await page.type("input[name=last_name]", "Doe");
-      await page.type("input[name=mobile_number]", "1234567890");
+      await page.type("input[name=mobile_number]", "800-555-1212");
       await page.type("input[name=people]", "3");
     });
 
@@ -49,12 +49,21 @@ describe("US-02 - Create reservation on a future, working date - E2E", () => {
 
       await page.click("button[type=submit]");
 
+      await page.timeout(1000);
+
+      const invalid = await page.evaluate(
+        () =>
+          document
+            .querySelector("#reservation_date")
+            .getAttribute("aria-invalid") === "true"
+      );
+
       await page.screenshot({
         path: ".screenshots/us-02-reservation-is-future-after.png",
       });
 
-      const alerts = await page.$$(".alert-danger");
-      expect(alerts.length).toBeGreaterThan(0);
+      const alerts = await page.$$(".invalid");
+      expect(invalid).toBeTruthy();
     });
 
     test("displays an error message if reservation date falls on a Tuesday", async () => {
@@ -71,7 +80,7 @@ describe("US-02 - Create reservation on a future, working date - E2E", () => {
         path: ".screenshots/us-02-reservation-is-working-day-after.png",
       });
 
-      const alerts = await page.$$(".alert-danger");
+      const alerts = await page.$$(".invalid");
       expect(alerts.length).toBeGreaterThan(0);
     });
   });
