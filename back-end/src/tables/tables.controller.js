@@ -161,6 +161,24 @@ function reservationExists(req, res, next) {
   next();
 }
 
+function urlHasValidPath(req, res, next) {
+  const methodName = "urlHasValidPath";
+  req.log.debug({ __filename, methodName, path: req.path });
+  if (!req.path.endsWith("seat") && !req.path.endsWith("finish")) {
+    const message = `URL: ${req.originalUrl} has invalid path: ${req.path}, valid paths end with 'seat' or 'finish'.`;
+    req.log.trace(
+      { __filename, methodName, valid: false, path: req.path },
+      message
+    );
+    return next({
+      status: 400,
+      message: message,
+    });
+  }
+  req.log.trace({ __filename, methodName, valid: true });
+  next();
+}
+
 function tableHasCapacity(req, res, next) {
   const methodName = "tableHasCapacity";
   req.log.debug({ __filename, methodName, locals: res.locals });
@@ -241,17 +259,23 @@ function setStatus(req, res, next) {
   next();
 }
 
-async function update(req, res, next) {
+async function update(req, res) {
   const methodName = "update";
   req.log.debug({ __filename, methodName, locals: res.locals });
-  res.locals.tableResponse = await service.update(res.locals.table);
+  const data = {
+    data: {
+      reservations: res.locals.reservationResponse,
+      tables: await service.update(res.locals.table),
+    },
+  };
+  res.status(200).json({ data });
   req.log.trace({
     __filename,
     methodName,
     return: true,
-    locals: res.locals,
+    locals: res.locals.table,
+    data,
   });
-  next();
 }
 
 module.exports = {
@@ -265,6 +289,7 @@ module.exports = {
   update: [
     asyncErrorBoundary(tableExists),
     reservationExists,
+    urlHasValidPath,
     tableHasCapacity,
     tableHasCorrectStatus,
     setStatus,

@@ -27,9 +27,8 @@ async function update(reservation) {
   return knex("reservations")
     .where({ reservation_id: reservation.reservation_id })
     .first()
-    .update(reservation)
     .returning("*")
-    .then((updatedRecords) => updatedRecords[0]);
+    .update(reservation);
 }
 
 module.exports = {

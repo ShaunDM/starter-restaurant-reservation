@@ -113,7 +113,6 @@ You can use the screenshots to debug your code by rendering additional informati
 - Add a calendar to the dashboard that allows people to navigate dates more easily.
 - Add the ability to delete and edit tables.
 - Add the ability to seat, finish, or cancel a reservation from edit reservation.
-- Due to the restaurant being closed on Tuesdays, some tests fail if performed on a Tuesday, primarily seating tests. Fix so testing can be performed any day.
 
 ## Technologies Used
 

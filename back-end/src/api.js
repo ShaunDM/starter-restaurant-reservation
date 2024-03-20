@@ -4,11 +4,4 @@ function formatDate(date) {
     .padStart(2, "0")}-${date.getDate().toString(10).padStart(2, "0")}`;
 }
 
-function today() {
-  return formatDate(new Date(Date.now()));
-}
-
-module.exports = {
-  formatDate,
-  today,
-};
+module.exports = formatDate;

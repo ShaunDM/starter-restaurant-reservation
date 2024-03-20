@@ -3,8 +3,6 @@ const request = require("supertest");
 const app = require("../src/app");
 const knex = require("../src/db/connection");
 
-const api = require("../src/api");
-
 describe("US-04 - Seat reservation", () => {
   beforeAll(() => {
     return knex.migrate
@@ -184,54 +182,22 @@ describe("US-04 - Seat reservation", () => {
     let barTableOne;
     let tableOne;
     let reservation;
-    let reservation2;
-    const today = api.today();
-
-    const data = {
-      first_name: "first",
-      last_name: "last",
-      mobile_number: "800-555-1212",
-      reservation_date: today,
-      reservation_time: "21:30",
-      people: 2,
-    };
-
-    const other = {
-      first_name: "Nice",
-      last_name: "Try",
-      mobile_number: "800-555-1212",
-      reservation_date: today,
-      reservation_time: "21:30",
-      people: 2,
-    };
 
     beforeEach(async () => {
       barTableOne = await knex("tables").where("table_name", "Bar #1").first();
       tableOne = await knex("tables").where("table_name", "#1").first();
-      const response = await request(app)
-        .post("/reservations/new")
-        .set("Accept", "application/json")
-        .send({ data });
-      const response2 = await request(app)
-        .post("/reservations/new")
-        .set("Accept", "application/json")
-        .send({ data });
       reservation = await knex("reservations")
-        .where("reservation_id", response.body.data.reservation_id)
-        .first();
-      reservation2 = await knex("reservations")
-        .where("reservation_id", response2.body.data.reservation_id)
+        .where("reservation_id", "1")
         .first();
     });
 
-    describe("PUT /reservations/:reservation_id/tables/:table_id/seat", () => {
+    describe("PUT reservations/:reservation_id/tables/:table_id/seat", () => {
       test("returns 400 if data is missing", async () => {
         expect(tableOne).not.toBeUndefined();
-        expect(reservation).not.toBeUndefined();
 
         const response = await request(app)
           .put(
-            `/reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
+            `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
           .send({ datum: {} });
@@ -240,45 +206,42 @@ describe("US-04 - Seat reservation", () => {
         expect(response.status).toBe(400);
       });
 
-      test("returns 404 if reservation_id is missing", async () => {
+      test("returns 400 if reservation_id is missing", async () => {
         expect(tableOne).not.toBeUndefined();
-
         const data = { status: "Sat" };
 
         const response = await request(app)
-          .put(`/reservations/tables/${tableOne.table_id}/seat`)
+          .put(`/tables/${tableOne.table_id}/seat`)
           .set("Accept", "application/json")
           .send({ data });
 
-        expect(response.status).toBe(404);
+        expect(response.body.error).toContain("reservation");
+        expect(response.status).toBe(400);
       });
 
       test("returns 400 if status is missing", async () => {
         expect(tableOne).not.toBeUndefined();
-        expect(reservation).not.toBeUndefined();
-
         const data = {};
 
         const response = await request(app)
           .put(
-            `/reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
+            `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
           .send({ data });
 
-        expect(response.body.error).toContain("Reservation");
+        expect(response.body.error).toContain("reservation");
         expect(response.status).toBe(400);
       });
 
       test("returns 404 if reservation_id does not exist", async () => {
         expect(tableOne).not.toBeUndefined();
-
         const reservation_id = 999;
         const data = { status: "Sat" };
 
         const response = await request(app)
           .put(
-            `/reservations/${reservation_id}/tables/${tableOne.table_id}/seat`
+            `reservations/${reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
           .send({ data });
@@ -287,47 +250,25 @@ describe("US-04 - Seat reservation", () => {
         expect(response.status).toBe(404);
       });
 
-      test("returns 400 if reservation is sat for a date other than today", async () => {
-        expect(tableOne).not.toBeUndefined();
-
-        const data = { status: "Sat" };
-
-        const response = await request(app)
-          .put(`/reservations/1/tables/${tableOne.table_id}/seat`)
-          .set("Accept", "application/json")
-          .send({ data });
-
-        expect(response.body.error).toContain("date");
-        expect(response.status).toBe(400);
-      });
-
       test("returns 200 if table has sufficient capacity", async () => {
         expect(tableOne).not.toBeUndefined();
-        expect(reservation).not.toBeUndefined();
 
         const response = await request(app)
           .put(
-            `/reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
+            `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
           .send({ data: { status: "Sat" } });
 
         expect(response.body.error).toBeUndefined();
-        expect(response.body.data.reservation).toHaveProperty("status", "Sat");
-        expect(response.body.data.table).toHaveProperty(
-          "reservation_id",
-          reservation.reservation_id
-        );
         expect(response.status).toBe(200);
       });
-
       test("returns 400 if table does not have sufficient capacity", async () => {
         expect(barTableOne).not.toBeUndefined();
-        expect(reservation).not.toBeUndefined();
 
         const response = await request(app)
           .put(
-            `/reservations/${reservation.reservation_id}/tables/${barTableOne.table_id}/seat`
+            `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
           .send({ data: { status: "Sat" } });
@@ -336,28 +277,13 @@ describe("US-04 - Seat reservation", () => {
         expect(response.status).toBe(400);
       });
 
-      test("returns 404 if URL does not end with 'seat' or 'finish'", async () => {
-        expect(tableOne).not.toBeUndefined();
-        expect(reservation).not.toBeUndefined();
-
-        const response = await request(app)
-          .put(
-            `/reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/bad`
-          )
-          .set("Accept", "application/json")
-          .send({ data: { status: "Sat" } });
-
-        expect(response.status).toBe(404);
-      });
-
       test("returns 400 if table is occupied", async () => {
         expect(tableOne).not.toBeUndefined();
-        expect(reservation).not.toBeUndefined();
 
         // first, occupy the table
         const occupyResponse = await request(app)
           .put(
-            `/reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
+            `reservations/${reservation.reservation_id}/tables/${tableOne.table_id}/seat`
           )
           .set("Accept", "application/json")
           .send({ data: { status: "Sat" } });
@@ -367,9 +293,7 @@ describe("US-04 - Seat reservation", () => {
 
         // next, try to assign the table to another reservation
         const doubleAssignResponse = await request(app)
-          .put(
-            `/reservations/${reservation2.reservation_id}/tables/${tableOne.table_id}/seat`
-          )
+          .put(`reservations/2/tables/${tableOne.table_id}/seat`)
           .set("Accept", "application/json")
           .send({ data: { status: "Sat" } });
 

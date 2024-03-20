@@ -12,23 +12,17 @@ const corsGet = cors({ method: "GET" });
 const corsPost = cors({ method: "POST" });
 const corsPut = cors({ method: "PUT" });
 
-//When it tries to route back to the parent router (reservations) it fails if I use .all(methodNotAllowed).
-
 router
   .route("/:table_id/finish")
   .put(corsPut, controller.update)
   .options(corsPut)
-  .get(methodNotAllowed)
-  .post(methodNotAllowed)
-  .delete(methodNotAllowed);
+  .all(methodNotAllowed);
 
 router
   .route("/:table_id/seat")
   .put(corsPut, controller.update)
   .options(corsPut)
-  .get(methodNotAllowed)
-  .post(methodNotAllowed)
-  .delete(methodNotAllowed);
+  .all(methodNotAllowed);
 
 router
   .route("/new")
