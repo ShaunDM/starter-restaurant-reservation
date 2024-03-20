@@ -2,7 +2,7 @@
 
 ## Currently a work in progress.
 
-To see completed application switch to branch: passed_thinkful.
+Application is completed, but currently learning pupppetteer to update the tests.
 
 ## Purpose
 
