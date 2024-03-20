@@ -2,7 +2,7 @@
 
 ## Currently a work in progress.
 
-Application is completed, but currently learning pupppetteer to update the tests.
+Application is completed, but currently learning puppeteer to update the tests.
 
 ## Purpose
 
