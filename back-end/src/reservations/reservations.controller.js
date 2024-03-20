@@ -128,7 +128,7 @@ function hasValidDate(req, res, next) {
   }
   //checks if reservation_date and reservation_time is in the future.
   if (Date.now() > Date.parse(date)) {
-    const message = "Reservation must be made in the future.";
+    const message = `Reservation must be made in the future. Date/Time requested: ${date}`;
     req.log.trace(
       { __filename, methodName, valid: false, params: date, body: req.body },
       message
